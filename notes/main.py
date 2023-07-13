@@ -1,22 +1,24 @@
 import uvicorn
 
 import config as c
+from responses import (rstart404, rbody)
+import latex
 
 async def app(scope, receive, send):
+    print(scope)
     assert scope['type'] == 'http'
-    event = await receive()
-    await send({
-        'type': 'http.response.start',
-        'status': 200,
-        'headers': [
-            [b'content-type', b'text/plain'],
-        ]
-    })
-    await send({
-        'type': 'http.response.body',
-        'body': b'Hello, world!',
-    })
+    url = scope['raw_path'].decode('utf-8')
 
+    match url:
+        case '/users':
+            pass
+        case '/articles':
+            pass
+        case '/assets':
+            await latex.test_site(send)
+        case _:
+            await send(rstart404.r)
+            await send(rbody.r(f"Error 404: URL {url} not found".encode('utf-8')))
 
 
 if __name__ == "__main__":
