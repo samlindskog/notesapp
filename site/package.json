@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "esbuild": "0.19.3",
+    "servor": "^4.0.2"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "scripts": {
+	  "build": "node ./build.mjs prod",
+	  "serve": "node ./build.mjs dev"
+  }
+}
