@@ -1,5 +1,6 @@
 import { argv } from 'node:process'
 import * as esbuild from 'esbuild'
+import {SourceMap} from 'node:module'
 
 switch(argv[2]) {
 	case "dev":
@@ -15,11 +16,13 @@ switch(argv[2]) {
 async function dev() {
 
 	let ctx = await esbuild.context({
-  		entryPoints: ['./src/main.jsx', './src/index.html'],
+  		entryPoints: ['./src/main.jsx'],
 		loader: {
 			'.html': 'text'
 		},
-  		outdir: 'srv'
+  		outdir: 'srv',
+		bundle: true,
+		logLevel: 'info',
 	})
 
 	await ctx.watch()
@@ -27,16 +30,13 @@ async function dev() {
 	let { host, port } = await ctx.serve({
 		servedir: 'srv',
 		host: 'localhost',
-		port: '8000'
+		port: 8000
 	})
 }
 
 async function prod() {
 	let build = await esbuild.build({
-  		entryPoints: ['./src/main.jsx', './src/index.html'],
-		loader: {
-			'.html': 'text'
-		},
+  		entryPoints: ['./src/main.jsx'],
 		target: [
 			'es6',
 			'chrome',
@@ -53,5 +53,6 @@ async function prod() {
 		treeShaking: true,
 		bundle: true,
 		outdir: 'build',
+		logLevel: 'info'
 	})
 }

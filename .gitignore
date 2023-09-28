@@ -1,1 +1,4 @@
-notessite/node_modules
+site/node_modules
+site/srv/*
+site/build/*
+*.swp
