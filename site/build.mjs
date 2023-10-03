@@ -23,6 +23,7 @@ async function dev() {
   		outdir: 'srv',
 		bundle: true,
 		logLevel: 'info',
+		plugins: ['']
 	})
 
 	await ctx.watch()
