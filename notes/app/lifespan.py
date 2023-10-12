@@ -1,7 +1,8 @@
 import logging
 
-from psycopg_pool import (AsyncConnectionPool)
-from config import (async_pool_config)
+from psycopg_pool import AsyncConnectionPool
+from repository.objects import ProfilesRepository, AssetsRepository
+from config import Resources
 
 applogger = logging.getLogger("app")
 
@@ -9,9 +10,13 @@ async def lifespan(scope, receive, send):
     message = await receive()
     if message["type"] == "lifespan.startup":
         try:
-            aconnpool = AsyncConnectionPool(**async_pool_config)
-            await aconnpool.open(wait = True, timeout = 30)
-            scope["state"] = {"aconnpool": aconnpool}
+            #loading resources from config
+            resources = Resources()
+            await resources.current_pool.open(wait = True, timeout = 5)
+            #initializing shared resources into scope
+            scope["state"]["pool"] = resources.current_pool
+            scope["state"]["assets"] = resources.assets_class
+            scope["state"]["profiles"] = resources.profiles_class
         except Exception:
             await send({
                 "type": "lifespan.startup.failed",
@@ -22,8 +27,8 @@ async def lifespan(scope, receive, send):
 
     elif message["type"] == "lifespan.shutdown":
         try:
-            aconnpool = scope["state"]["aconnpool"]
-            aconnpool.close()
+            pool = scope["state"]["pool"]
+            await pool.close()
         except Exception:
             await send({
                 "type": "lifespan.shutdown.failed",
@@ -33,8 +38,4 @@ async def lifespan(scope, receive, send):
             await send({
                 "type": "lifespan.shutdown.complete"
             })
-        
 
-    scope["state"] = {
-        "async_conn_pool": AsyncConnectionPool(**async_pool_config),
-    }
