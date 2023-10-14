@@ -3,6 +3,7 @@ from psycopg.rows import dict_row
 
 from psycopg_pool import AsyncConnectionPool
 from repository.objects import AssetsRepository, ProfilesRepository
+from app.app import App
 
 def config_factory(config):
     match config:
@@ -37,10 +38,15 @@ class Resources:
         return self._aconnpool
 
     @property
-    def profiles_class(self):
+    def profiles(self):
         return ProfilesRepository.use_async_connection_pool(self._aconnpool)
 
     @property
-    def assets_class(self):
+    def assets(self):
         return AssetsRepository.use_async_connection_pool(self._aconnpool)
 
+    @property
+    def app(self):
+        #Initialize routes
+        import app.routes
+        return App
