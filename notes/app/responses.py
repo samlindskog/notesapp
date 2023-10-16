@@ -1,4 +1,4 @@
-rstart404 = {
+rstart404_html = {
     'type': 'http.response.start',
     'status': 404,
     'headers': [
@@ -6,6 +6,29 @@ rstart404 = {
     ]
 }
 
+rstart404_json = {
+    'type': 'http.response.start',
+    'status': 404,
+    'headers': [
+        [b'content-type', b'application/ld+json'],
+    ]
+}
+
+rstart400_json = {
+    'type': 'http.response.start',
+    'status': 400,
+    'headers': [
+        [b'content-type', b'application/ld+json'],
+    ]
+}
+
+rstart400_html = {
+    'type': 'http.response.start',
+    'status': 400,
+    'headers': [
+        [b'content-type', b'text/html'],
+    ]
+}
 rstart200_json = {
     'type': 'http.response.start',
     'status': 200,

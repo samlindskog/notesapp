@@ -26,10 +26,10 @@ class Repository(AbstractAsyncContextManager):
         await self._aconnpool.putconn(self._aconn)
 
     '''
-    Filter repository by column = value. Optionally specify amount and offset,
-    default orderby="date" DESC.
+    Filter repository by column = value. Optionally specify orderby, record limit, offset,
+    DESC of ASC, and encoding
     '''
-    async def queryfilter(self, column, value, orderby="", limit=15, offset=0, desc=True, utf8_json=True):
+    async def queryfilter(self, column, value, orderby="", limit=15, offset=0, desc=True):
         _column = column
         _value = value
         _orderby = orderby or column
@@ -49,8 +49,7 @@ class Repository(AbstractAsyncContextManager):
         async with self._aconn.cursor() as acur:
             await acur.execute(_query, (value, limit, offset))
             query_response = await acur.fetchall()
-        if utf8_json:
-            return json.dumps(query_response).encode('utf-8')
+        return json.dumps(query_response).encode('utf-8')
 
 
 class AssetsRepository(Repository):

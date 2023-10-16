@@ -1,5 +1,6 @@
+import logging
 import re
-from app.responses import rstart404, rbody
+from app.responses import rstart404_html, rstart400_html, rbody
 
 '''
 Routing within App is determined by a decorator @App.route(path, params={key: value,})
@@ -17,26 +18,31 @@ class App():
 
     async def run(self, scope, recieve, send):
         current_scope_values = self._scope_values(scope) or []
-        for route in self._routes:
-            pattern = re.compile(route[0])
-            match = pattern.match(scope["path"])
-            if not match:
-                continue
-            elif not current_scope_values:
-                #run callback with current request parameters
-                await route[2](scope, recieve, send)
-                break
-            for param in current_scope_values:
-                if route[1] == param:
+        try:
+            for route in self._routes:
+                pattern = re.compile(route[0])
+                match = pattern.match(scope["path"])
+                if not match:
+                    continue
+                elif not current_scope_values:
+                    #run callback with current request parameters
                     await route[2](scope, recieve, send)
                     break
+                for param in current_scope_values:
+                    if route[1] == param:
+                        await route[2](scope, recieve, send)
+                else:
+                    continue
+                break
             else:
-                continue
-            break
-        else:
-            #if no matches found, return error 404
-            await send(rstart404)
-            await send(rbody(f"Error 404: URL {scope['path']} not found".encode('utf-8')))
+                #if no matches found, return error 404
+                await send(rstart404_html)
+                await send(rbody(f"Error 404: URL {scope['path']} not found".encode('utf-8')))
+        except Exception as e:
+            logging.debug(str(e))
+            await send(rstart400_html)
+            await send(rbody("Error 400: bad request :(".encode('utf-8')))
+
   
     #params must contain the same keys for each invocation
     @classmethod
