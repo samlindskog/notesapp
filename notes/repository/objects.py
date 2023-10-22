@@ -37,7 +37,7 @@ class Repository(AbstractAsyncContextManager):
         _offset = isinstance(offset, int) and offset or ""
         _desc = desc and "DESC" or "ASC"
         
-        _query = sql.SQL('''
+        query = sql.SQL('''
             SELECT * FROM notes.{tableref1} WHERE {colref1} = %s
             ORDER BY {colref2} ''' + _desc + ''' LIMIT %s OFFSET %s
             ''').format(
@@ -47,10 +47,21 @@ class Repository(AbstractAsyncContextManager):
             ) #this is ugly af
         assert isinstance(self._aconn, AsyncConnection)
         async with self._aconn.cursor() as acur:
-            await acur.execute(_query, (value, limit, offset))
+            await acur.execute(query, (value, limit, offset))
             query_response = await acur.fetchall()
         return json.dumps(query_response).encode('utf-8')
 
+    async def insert(self, columns, values):
+        query = sql.SQL('''
+            INSERT INTO notes.{tableref1} ({colrefs1}) VALUES (%s)
+                ''').format(
+                        tableref1=sql.Identifier(self._table),
+                        colrefs1=sql.SQL(", ").join(
+                            sql.Identifier(n) for n in columns
+                            )
+                )
+        async with self._aconn as acur:
+            await acur.execute(query, values)
 
 class AssetsRepository(Repository):
     _table = 'assets'

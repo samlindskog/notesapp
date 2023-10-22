@@ -45,7 +45,7 @@ rstart200_html = {
     ]
 }
 
-def rbody(body, more=False):
+def rbody(body: bytes | None, more: bool = False) -> dict[str, str | bytes | bool | None]:
     return {
         'type': 'http.response.body',
         'body': body,
