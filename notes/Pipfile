@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 uvicorn = {extras = ["standard"], version = "*"}
 psycopg = {extras = ["pool"], version = "*"}
+oauthlib = {extras = ["signedtoken"], version = "*"}
+pyjwt = "*"
+autopep8 = "*"
 
 [dev-packages]
 

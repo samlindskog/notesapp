@@ -1,5 +1,6 @@
 import os.path
 
+
 async def serve_static(send, path):
     filepath = os.path.abspath(path)
     file = open(filepath, mode='r')

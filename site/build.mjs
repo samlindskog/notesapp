@@ -1,4 +1,5 @@
 import { argv } from 'node:process'
+import {sassPlugin} from 'esbuild-sass-plugin'
 import * as esbuild from 'esbuild'
 import {SourceMap} from 'node:module'
 
@@ -23,7 +24,7 @@ async function dev() {
   		outdir: 'srv',
 		bundle: true,
 		logLevel: 'info',
-		plugins: ['']
+		plugins: [sassPlugin()]
 	})
 
 	await ctx.watch()
@@ -31,7 +32,7 @@ async function dev() {
 	let { host, port } = await ctx.serve({
 		servedir: 'srv',
 		host: 'localhost',
-		port: 8000
+		port: 8001
 	})
 }
 

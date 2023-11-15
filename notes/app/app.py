@@ -1,6 +1,7 @@
 import logging
 import re
 import pdb
+from types import ClassMethodDescriptorType
 from typing import Callable
 from app._types import uvc_scope, uvc_recieve, uvc_send, asgi_app
 from urllib.parse import parse_qs
@@ -14,10 +15,12 @@ the optional "params" argument is a dictionary with entries of the form
 {key: value} with scope["key"]="value", matched verbatim against the request scope.
 https://asgi.readthedocs.io/en/latest/specs/www.html for more details.
 '''
+
+
 class App():
-    #[scope_key, ...]
+    # [scope_key, ...]
     _route_scope_keys = []
-    #[[path, [scope_value, ...], callback], ...]
+    # [[path, [scope_value, ...], callback], ...]
     _routes = []
 
     def _inject_scope(self, scope: uvc_scope, params: dict) -> None:
@@ -28,7 +31,7 @@ class App():
         try:
             current_scope_values = [scope[k] for k in self._route_scope_keys]
             current_scope_values.sort()
-            current_path=scope["path"]
+            current_path = scope["path"]
             for route in self._routes:
                 pattern = re.compile(route[0])
                 if not current_path:
@@ -38,37 +41,38 @@ class App():
                     continue
                 elif not current_scope_values:
                     self._inject_scope(
-                            scope, {
+                        scope, {
                             "group": list(match.groups()),
                             "qs_args": self._querystring_argparser(scope["query_string"], route[2])
-                            })
-                    #run callback with current request parameters
+                        })
+                    # run callback with current request parameters
                     await route[3](scope, recieve, send)
                     break
-                route_scope_values = [v for k,v in route[1].items()]
+                route_scope_values = [v for k, v in route[1].items()]
                 route_scope_values.sort()
                 if route_scope_values == current_scope_values:
                     self._inject_scope(
-                            scope, {
+                        scope, {
                             "group": list(match.groups()),
                             "qs_args": self._querystring_argparser(scope["query_string"], route[2])
-                            })
+                        })
                     await route[3](scope, recieve, send)
                 else:
                     continue
                 break
             else:
-                #if no matches found, return error 404
+                # if no matches found, return error 404
                 await send(rstart404_html)
                 await send(rbody(f"Error 404: URL {current_path} not found".encode('utf-8')))
-        except BadQueryError as e:
+        except ValueError as e:
             logging.debug(str(e))
             await send(rstart400_html)
             await send(rbody("Error 400: bad request :(".encode('utf-8')))
-    
-    #parse querystring to dictionary and decode b"key":[b"value"] pairs
+
+    # parse querystring to dictionary and decode b"key":[b"value"] pairs
     def _querystring_decode(self, query_string: bytes) -> dict[str, str]:
-        query_dictionary = parse_qs(query_string, strict_parsing=True, errors="strict")
+        query_dictionary = parse_qs(
+            query_string, strict_parsing=True, errors="strict")
         return {k.decode("utf-8"): v[0].decode("utf-8") for k, v in query_dictionary.items()}
 
     '''
@@ -81,23 +85,26 @@ class App():
     throws exceptions when params matching target_args are invalid, or if querystring itself
     is invalid
     '''
-    #this deserves a second glance, pretty sure it is poopoo
+    # this deserves a second glance, pretty sure it is poopoo
+
     def _querystring_argparser(self, query_string: bytes, target_args: dict[str, str]) -> dict[str, str]:
         query_dictionary = self._querystring_decode(query_string)
-        args = [[k,v, target_args[k]] for k,v in query_dictionary.items() if k in target_args.keys()]
+        args = [[k, v, target_args[k]]
+                for k, v in query_dictionary.items() if k in target_args.keys()]
         valid_args = {}
         for arg in args:
             key = arg[0]
             value = arg[1]
-            t=arg[2]
+            t = arg[2]
             if not value:
-                raise BadQueryError("invalid querystring: empty parameter")
+                raise ValueError("invalid querystring: empty parameter")
             match t:
                 case "string":
                     valid_args[key] = value
                 case "int":
                     if len(value) > 2:
-                        raise BadQueryError("invalid querystring: value of type int exceeds length 2")
+                        raise ValueError(
+                            "invalid querystring: value of type int exceeds length 2")
                     valid_args[key] = int(value)
                 case "bool":
                     if value == "true":
@@ -105,11 +112,12 @@ class App():
                     elif value == "false":
                         valid_args[key] = False
                     else:
-                        raise BadQueryError("invalid querystring: value could not be converted to type bool")
+                        raise ValueError(
+                            "invalid querystring: value could not be converted to type bool")
                 case _:
-                    raise BadQueryError("invalid target_args: type unsupported")
+                    raise ValueError("invalid target_args: type unsupported")
         if not valid_args:
-            raise BadQueryError("invalid querystring: no valid parameters")
+            raise ValueError("invalid querystring: no valid parameters")
         return valid_args
 
     '''
@@ -129,7 +137,7 @@ class App():
     parse query string parameters into a dictionary, with key matched
     against querystring keys, and type used to convert querystring
     values. The resulting dictionary is passed into scope["qs_args"]
-    '''      
+    '''
     @classmethod
     def route(
         cls,
@@ -138,21 +146,18 @@ class App():
         qs_args: dict[str, str] = {}
     ) -> Callable[[asgi_app], asgi_app]:
         def wrapper(fn):
-            #scope params that are safely mutable
+            # scope params that are safely mutable
             mscope_params = scope_params or {}
             scope_items = mscope_params.items()
-            scope_keys = [k for k,v in mscope_params.items()]
+            scope_keys = [k for k, v in mscope_params.items()]
             scope_keys.sort()
             if not cls._routes:
                 cls._route_scope_keys = scope_keys
-            #test this plz
+            # test this plz
             elif cls._routes[-1] and scope_keys != cls._route_scope_keys:
                 raise ValueError("App.route param keys differ")
 
-            #list of routes
+            # list of routes
             cls._routes.append([path, scope_params, qs_args, fn])
             return fn
         return wrapper
-
-class BadQueryError(Exception):
-    pass
