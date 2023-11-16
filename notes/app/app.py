@@ -8,11 +8,12 @@ from urllib.parse import parse_qs
 from app.responses import rstart404_html, rstart400_html, rbody
 
 '''
-Routing within App is determined by a decorator @App.route(path, params={key: value,})
+Routing within App is determined by a decorator @App.route(path, scope_params={str:str, qs_args={str:str})
 on the desired callback. If the request matches the pattern(s) specified, the callback
-is ran. The "path" argument is a regex pattern used to match against scope["path"], and 
-the optional "params" argument is a dictionary with entries of the form
-{key: value} with scope["key"]="value", matched verbatim against the request scope.
+is ran. The "path" argument is a regex pattern used to match against scope["path"].
+the optional "scope_params" argument is a dictionary with entries of the form
+{key: value} with scope["key"]="value", matched verbatim against the request scope. qs_args
+matches a request query string against expected args, and checks if their type is compatible.
 https://asgi.readthedocs.io/en/latest/specs/www.html for more details.
 '''
 
@@ -29,17 +30,18 @@ class App():
 
     async def run(self, scope: uvc_scope, recieve: uvc_recieve, send: uvc_send) -> None:
         try:
-            current_scope_values = [scope[k] for k in self._route_scope_keys]
-            current_scope_values.sort()
             current_path = scope["path"]
+            current_scope_values = [scope[k] for k in self._route_scope_keys]
+            #sorted for match against route_scope_values
+            current_scope_values.sort()
             for route in self._routes:
-                pattern = re.compile(route[0])
                 if not current_path:
                     break
+                pattern = re.compile(route[0])
                 match = pattern.fullmatch(current_path)
                 if not match:
                     continue
-                elif not current_scope_values:
+                if not current_scope_values:
                     self._inject_scope(
                         scope, {
                             "group": list(match.groups()),
@@ -49,17 +51,25 @@ class App():
                     await route[3](scope, recieve, send)
                     break
                 route_scope_values = [v for k, v in route[1].items()]
+                #sorted for match against current_scope_values
                 route_scope_values.sort()
-                if route_scope_values == current_scope_values:
+                for route_value, current_value in zip(route_scope_values, current_scope_values):
+                    if route_value == current_value:
+                        continue
+                    #don't match empty route parameters
+                    elif route_value == "":
+                        continue
+                    else:
+                        break
+                else:
                     self._inject_scope(
                         scope, {
                             "group": list(match.groups()),
                             "qs_args": self._querystring_argparser(scope["query_string"], route[2])
                         })
+                    # run callback with current request parameters
                     await route[3](scope, recieve, send)
-                else:
-                    continue
-                break
+                    break            
             else:
                 # if no matches found, return error 404
                 await send(rstart404_html)
@@ -70,6 +80,7 @@ class App():
             await send(rbody("Error 400: bad request :(".encode('utf-8')))
 
     # parse querystring to dictionary and decode b"key":[b"value"] pairs
+    # maybe this shouldn't be a seperate function
     def _querystring_decode(self, query_string: bytes) -> dict[str, str]:
         query_dictionary = parse_qs(
             query_string, strict_parsing=True, errors="strict")
@@ -121,22 +132,18 @@ class App():
         return valid_args
 
     '''
-    route is a decorator which runs decorated function when a request
-    matches specified conditions
+    route is a decorator, registering decorated function with a route, calling
+    it when an incoming request matches specified conditions, sending 400 errors
+    if request queryparameters are invalid.
 
     path is regex pattern matched against scope["path"]. All groups are
-    matched and passed as a list into scope["group"]
+    matched and passed as a list into scope["group"] for decorated function.
 
-    params, of the form {"key": "value", ...}, is used to match requests
-    whose scope["key"]=="value". Must contain the same keys for each
-    invocation of App.route(). All filter params being specified by their
-    keys in each invocation enhances readability, and mitigates phantom
-    matches at runtime
+    scope_params must contain the same keys for each invocation of App.route().
 
-    qs_args, of the form {"key":"type", ...} specifies how to
-    parse query string parameters into a dictionary, with key matched
-    against querystring keys, and type used to convert querystring
-    values. The resulting dictionary is passed into scope["qs_args"]
+    qs_args, of the form {"key":"type", ...} specifies valid query string for given request path,
+    and what to parse into dictionary which is passed into scope["qs_args"] for decorated
+    function.
     '''
     @classmethod
     def route(
@@ -153,10 +160,8 @@ class App():
             scope_keys.sort()
             if not cls._routes:
                 cls._route_scope_keys = scope_keys
-            # test this plz
             elif cls._routes[-1] and scope_keys != cls._route_scope_keys:
                 raise ValueError("App.route param keys differ")
-
             # list of routes
             cls._routes.append([path, scope_params, qs_args, fn])
             return fn

@@ -1,3 +1,4 @@
+from pathlib import PosixPath
 import uvicorn
 from psycopg.rows import dict_row
 
@@ -5,10 +6,13 @@ from psycopg_pool import AsyncConnectionPool
 from repository.objects import AssetsRepository, ProfilesRepository
 from app.app import App
 
+maindir = PosixPath(__file__).parent
+assetsdir = maindir/"assets"
+
 
 def config_factory(config):
     match config:
-        case 'development':
+        case "development":
             return uvicorn.Config(
                 app="main:app",
                 reload=True,

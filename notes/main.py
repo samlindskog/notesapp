@@ -18,10 +18,10 @@ async def lifespan(scope, receive, send):
             # initialized app instance loaded
             scope["state"]["app"] = resources.app()
 
-        except Exception:
+        except Exception as e:
             await send({
                 "type": "lifespan.startup.failed",
-                "message": Exception
+                "message": str(e)
             })
         else:
             await send({"type": "lifespan.startup.complete"})
@@ -30,10 +30,10 @@ async def lifespan(scope, receive, send):
         try:
             pool = scope["state"]["pool"]
             await pool.close()
-        except Exception:
+        except Exception as e:
             await send({
                 "type": "lifespan.shutdown.failed",
-                "message": Exception
+                "message": str(e)
             })
         else:
             await send({

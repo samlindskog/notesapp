@@ -44,6 +44,13 @@ rstart200_html = {
         [b'content-type', b'text/html'],
     ]
 }
+rstart201_html = {
+    'type': 'http.response.start',
+    'status': 201,
+    'headers': [
+        [b'content-type', b'text/html'],
+    ]
+}
 
 def rbody(body: bytes | None, more: bool = False) -> dict[str, str | bytes | bool | None]:
     return {

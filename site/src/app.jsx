@@ -4,9 +4,9 @@ const URL = "http://127.0.0.1:8000"
 
 function App() {
 	return(
-	<form id="uploadForm">
+	<form id="uploadForm" action="http://127.0.0.1:8000/assets/upload/?owner=sam&title=test1" method="post" enctype="multipart/form-data">
    	<input type="file" name="file" data-cloudinary-field="image_id"></input>
-   	<progress id="progressBar" value="0" max="100"></progress>
+		<button type="submit">Submit</button>
 	</form>)
 }
 

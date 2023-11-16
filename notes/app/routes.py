@@ -1,7 +1,9 @@
 import pdb
 import json
+from codecs import getencoder
+from config import assetsdir
 from app.app import App
-from app.responses import rbody, rstart200_json
+from app.responses import rbody, rstart200_json, rstart201_html
 
 
 async def read_body(receive) -> str:
@@ -15,7 +17,7 @@ async def read_body(receive) -> str:
 
 
 @App.route(
-    r"^/profiles/(.+)/?$",
+    r"^/profiles/(.+)/?.*$",
     scope_params={"method": "GET"},
     qs_args={"orderby": "string", "limit": "int",
              "offset": "int", "desc": "bool"}
@@ -28,16 +30,16 @@ async def get_profiles(scope, recieve, send) -> None:
 
     if resource_path:
         async with profiles() as p:
-            response_body = await p.queryfilter('uname', resource_path, **querystring_args, encode='utf-8') or None
+            response_body = await p.queryfilter('uname', resource_path, **querystring_args) or None
             await send(rstart200_json)
             await send(rbody(json.dumps(response_body).encode('utf_8')))
     else:
-        raise Exception("send did not run")
+        raise ValueError("invalid querystring")
 
 
 @App.route(
-    r"^/assets/upload/?$",
-    scope_params={"method": "POST", "content-type": "multipart/form-data"},
+    r"^/assets/upload/?.*$",
+    scope_params={"method": "POST"},
     qs_args={"owner": "string", "title": "string", "parentid": "string"}
 )
 async def post_asset(scope, recieve, send):
@@ -49,12 +51,18 @@ async def post_asset(scope, recieve, send):
 
     assets = scope['state']['assets']
     body = await read_body(recieve)
-    querystring_args = json.loads(body)
-
     async with assets() as a:
-        if owner and title:
-            _ = await a.insert(["owner", "title"], None, **querystring_args) or None
         if owner and parentid:
-            _ = await a.insert(["owner", "parentid"], None, **querystring_args) or None
-        await send(rstart200_json)
-        await send(rbody())
+            new_row = await a.insert(["owner", "parentid"], [owner, parentid], returning=True, encoding=None)
+            parentid = new_row["parentid"]
+        elif owner and title:
+            new_row = await a.insert(["owner", "title"], [owner, title], returning=True, encoding=None)
+            parentid = new_row["parentid"]
+        else:
+            raise ValueError("invalid querystring")
+    asset = assetsdir / str(parentid)
+    with open(asset, mode="x") as newasset:
+        newasset.write(body)
+
+    await send(rstart201_html)
+    await send(rbody(None))
