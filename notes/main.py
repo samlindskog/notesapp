@@ -19,10 +19,7 @@ async def lifespan(scope, receive, send):
             scope["state"]["app"] = resources.app()
 
         except Exception as e:
-            await send({
-                "type": "lifespan.startup.failed",
-                "message": str(e)
-            })
+            await send({"type": "lifespan.startup.failed", "message": str(e)})
         else:
             await send({"type": "lifespan.startup.complete"})
 
@@ -31,14 +28,9 @@ async def lifespan(scope, receive, send):
             pool = scope["state"]["pool"]
             await pool.close()
         except Exception as e:
-            await send({
-                "type": "lifespan.shutdown.failed",
-                "message": str(e)
-            })
+            await send({"type": "lifespan.shutdown.failed", "message": str(e)})
         else:
-            await send({
-                "type": "lifespan.shutdown.complete"
-            })
+            await send({"type": "lifespan.shutdown.complete"})
 
 
 async def http(scope, recieve, send):
@@ -47,13 +39,14 @@ async def http(scope, recieve, send):
 
 
 async def app(scope, receive, send):
-    match scope['type']:
-        case 'http':
+    match scope["type"]:
+        case "http":
             await http(scope, receive, send)
-        case 'lifespan':
+        case "lifespan":
             await lifespan(scope, receive, send)
 
+
 if __name__ == "__main__":
-    config = config_factory('development')
+    config = config_factory("development")
     server = uvicorn.Server(config)
     server.run()

@@ -7,7 +7,7 @@ from repository.objects import AssetsRepository, ProfilesRepository
 from app.app import App
 
 maindir = PosixPath(__file__).parent
-assetsdir = maindir/"assets"
+assetsdir = maindir / "assets"
 
 
 def config_factory(config):
@@ -32,7 +32,7 @@ async_pool_config = {
     "kwargs": _connectargs,  # args for connect()
     "open": False,
     "max_idle": 1,  # idle time of connection before it is closed
-    "num_workers": 3  # number of threads used by connectionpool
+    "num_workers": 3,  # number of threads used by connectionpool
 }
 
 
@@ -56,4 +56,5 @@ class Resources:
     def app(self):
         # Initialize routes
         import app.routes
+
         return App

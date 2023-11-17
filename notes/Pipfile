@@ -8,7 +8,8 @@ uvicorn = {extras = ["standard"], version = "*"}
 psycopg = {extras = ["pool"], version = "*"}
 oauthlib = {extras = ["signedtoken"], version = "*"}
 pyjwt = "*"
-autopep8 = "*"
+streaming-form-data = "*"
+black = "*"
 
 [dev-packages]
 
