@@ -1,3 +1,4 @@
+from abc import ABC
 import logging
 import re
 import pdb
@@ -5,6 +6,8 @@ from typing import Callable
 from app._types import uvc_scope, uvc_recieve, uvc_send, asgi_app
 from urllib.parse import parse_qs
 from app.responses import rstart404_html, rstart400_html, rbody
+
+logger = logging.getLogger(__name__)
 
 """
 Routing within App is determined by a decorator @App.route(path, scope_params={str:str, qs_args={str:str})
@@ -15,12 +18,11 @@ the optional "scope_params" argument is a dictionary with entries of the form
 matches a request query string against expected args, and checks if their type is compatible.
 https://asgi.readthedocs.io/en/latest/specs/www.html for more details.
 """
-
-
 class App:
-    # [scope_key, ...]
+    # [scope_key: str]
+    # consolidate this with _routes
     _route_scope_keys = []
-    # [[path, [scope_value, ...], callback], ...]
+    # [[path: str, [scope_value: str], Callable]]
     _routes = []
 
     def _inject_scope(self, scope: uvc_scope, params: dict) -> None:
@@ -86,9 +88,9 @@ class App:
                     rbody(f"Error 404: URL {current_path} not found".encode("utf-8"))
                 )
         except ValueError as e:
-            logging.debug(str(e))
             await send(rstart400_html)
             await send(rbody("Error 400: bad request :(".encode("utf-8")))
+            raise e
 
     # parse querystring to dictionary and decode b"key":[b"value"] pairs
     # maybe this shouldn't be a seperate function
@@ -176,7 +178,7 @@ class App:
             # scope params that are safely mutable
             mscope_params = scope_params or {}
             scope_items = mscope_params.items()
-            scope_keys = [k for k, v in mscope_params.items()]
+            scope_keys = [k for k, v in scope_items]
             scope_keys.sort()
             if not cls._routes:
                 cls._route_scope_keys = scope_keys
@@ -187,3 +189,60 @@ class App:
             return fn
 
         return wrapper
+
+class Request(ABC):
+    _route: list | None = None
+    def __init__(self, scope, recieve, send):
+        self._scope = scope
+        self._recieve = recieve
+        self._send = send
+
+    #work after initialization
+    @property
+    def route(self) -> list | None:
+        if self._route:
+            return self._route.copy()
+        else:
+            return None
+
+class Middleware(ABC):
+    _middleware_type = None
+    _nice = 3
+    def __init__(self):
+        pass
+
+    async def run(self, request: Request) -> Request:
+        return request
+
+class MidApp:
+    _middleware: list[Middleware]  = []
+    def __init__(self):
+        for m in self._middleware:
+            pass
+    
+    @classmethod
+    def add_middleware(cls, middleware):
+        if isinstance(middleware, Middleware):
+            cls._middleware.append(middleware)
+            cls._sort(cls._middleware)
+        else:
+            raise ValueError("invalid add_middleware")
+
+    async def run(self, scope, recieve, send):
+        # gateway between asgi and app-internal request framework. instantiates new
+        # request, and runs it through pipeline. catch errors, send appropriate error
+        # http responses (404, 400, etc.). if pipeline runs successfully, run request
+        # callback
+        pass
+
+    async def _pipe(self, request: Request) -> Request:
+        # run request through each middleware, return request
+        return request
+
+    async def _initialize_middleware(self):
+        pass
+
+    def _sort(self, middleware):
+        for m in middleware:
+            
+

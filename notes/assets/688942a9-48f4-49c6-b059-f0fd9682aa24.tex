@@ -1,0 +1,204 @@
+\documentclass{article}
+\usepackage[left=3cm,right=3cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\setlength{\parindent}{0mm}
+
+\begin{document}
+\title{Discreet Math Notes}
+\author{Samuel Lindskog}
+\date{\today}
+\maketitle
+\renewcommand{\abstractname}{}
+
+\setcounter{secnumdepth}{2}
+
+\section{Basic Terms, laws, and concepts}
+\subsection{Laws of Statements}
+\subsubsection{DeMorgan's laws}
+	\begin{align*}
+		&\neg(P\wedge Q)\equiv \neg P\vee \neg Q\\
+		&\neg(P\vee Q)\equiv \neg P\wedge \neg Q
+	\end{align*}
+\subsubsection{Commutative laws}
+	\begin{align*}
+		&P\wedge Q\equiv Q\wedge P\\
+		&P\vee Q\equiv Q\vee P
+	\end{align*}
+\subsubsection{Associative laws}
+	\begin{align*}
+		&P\wedge(Q\wedge R)\equiv (P\wedge Q)\wedge R\\
+		&P\vee(Q\vee R)\equiv (P\vee Q)\vee R
+	\end{align*}
+\subsubsection{Idempotent laws}
+	\begin{align*}
+		&P\wedge P\equiv P\\
+		&P\vee P\equiv P
+	\end{align*}
+\subsubsection{Distrubutive laws}
+	\begin{align*}
+		&P\wedge (Q\vee R)\equiv (P\wedge Q)\vee (P\wedge R)\\
+		&P\vee (Q\wedge R)\equiv (P\vee Q)\wedge (P\vee R)
+	\end{align*}
+\subsubsection{Absorption laws}
+	\begin{align*}
+		&P\vee (P\wedge Q)\equiv P&&(P\wedge Q)\text{ is always false when \(\neg P\)}\\
+		&P\wedge (P\vee Q)\equiv P&&(P\vee Q)\text{ is always true when \(P\)}
+	\end{align*}
+\subsubsection{Double Negation law}
+	\begin{displaymath}
+		\neg\neg P\equiv P
+	\end{displaymath}
+\subsubsection{Tautology laws}
+	A tautology is a statement that is always true
+	\begin{align*}
+		&P\wedge(\text{tautology})\equiv P\\
+		&P\vee(\text{tautology})\equiv \text{tautology}\\
+		&\neg(\text{tautology})\equiv \text{contradiction}
+	\end{align*}
+\subsubsection{Contradiction laws}
+	A contradiction is a statement that is always false
+	\begin{align*}
+		&P\wedge(\text{contradiction})\equiv \text{contradiction}\\
+		&P\vee(\text{contradiction})\equiv P\\
+		&\neg(\text{contradiction})\equiv \text{tautology}
+	\end{align*}
+\subsection{Free and Unbound variables}
+In the statement \(y\in\{x\mid P(x)\}\), \(y\) is the \emph{free variable} and \(x\) is the \emph{bound variable}. The free variables stand for objects the statement says something about. Bound variables are letters used for their convenience in expressing ideas, and should not be thought of as standing for any particular object. Statements with only bound variables are just objects, but statements with free variables can be true or false.
+\subsection{Universe of discourse}
+	When a statement contains variables, the \emph{universe of discourse} is the set of all values the variables can take on, and we say that these variables \emph{range over} this universe. For example, suppose \(P(x)\) is a statement, with the variable \(x\) ranging over universe \(U\). Then, the truth set of \(P(x)\) with universe \(U\) is \(\{x\in U\mid P(x)\}\), which can be stated implicitly as \(\{x\mid P(x)\}\).
+\subsection{Truth set}
+The truth set of a statement \(P(x)\) is the set of all x in the universe of discourse that make the statement \(P(x)\) true i.e.
+\begin{displaymath}
+	\text{The truth set of } P(x) \equiv \{x\mid P(x)\}
+\end{displaymath}
+\(P(y)\) can also be written in its equivalent forms
+\begin{displaymath}
+	y\in\{x\mid P(x)\}\equiv P(y)
+\end{displaymath}
+\subsubsection{Example:}
+\begin{displaymath}
+	y\in\{x\in\mathbb{R}\mid x<3\}\equiv y\in\mathbb{R}\wedge y<3
+\end{displaymath}
+\subsection{Standard sets}
+\subsubsection{\(\mathbb{N}\)}
+The set of natural numbers \{1,2,3,\ldots\}
+\subsubsection{\(\mathbb{W}\)}
+The set of whole numbers \{0,1,2,3,\ldots\}
+\subsubsection{\(\mathbb{Z}\)}
+The set of integers \{\ldots ,-1,0,1,\ldots\}
+\subsubsection{\(\mathbb{Q}\)}
+The set of rational numbers \(\{\frac{a}{b}\lvert a,b\in\mathbb{Z}, b\neq 0\}\)
+\subsubsection{\(\mathbb{R}\)}
+The set of real numbers
+\subsubsection{Irrational numbers}
+\begin{displaymath}
+	\{x\in\mathbb{R}\mid x\notin\mathbb{Q}\}	
+\end{displaymath}
+\subsubsection{Even numbers}
+\begin{displaymath}
+\{x\in\mathbb{Z}\mid x=2m, m\in\mathbb{Z}\}
+\end{displaymath}
+\subsubsection{Odd numbers}
+\begin{displaymath}
+\{x\in\mathbb{Z}\mid x=2m+1, m\in\mathbb{Z}\}
+\end{displaymath}
+\subsection{Cardinality}
+The cardinality of a finite set \(S\) is the number of elements in \(S\), denoted \(\lvert S\rvert\)
+\subsubsection{Cardinality of unions}
+\(\lvert S\cup T\rvert = \lvert S\rvert +\lvert T\rvert - \lvert S\cap T\rvert\)
+\subsection{Empty set}
+The empty set \(\emptyset\), equivalent to \(\{\}\), is a \emph{subset}(\(\subseteq\)) of any set, but not an \emph{element}(\(\in\)) of every set.
+\subsection{Collections and Families}
+A collection or family (both mean the same thing) is a set of sets, e.g. \(\{\{2,3,4\},\{2,1,3\}\}\). Usually represented with capital script letters, e.g. \(\mathscr{L}\). Can also be indexed \(\{S_k\lvert k\in I\}\)
+\subsection{Power set}
+The collection of all subsets of \(S\) is called the power set of \(S\), denoted: \(\mathscr{P}(S)=\{A\mid A\subseteq S\}\)
+\subsection{Intesection and union}
+Intersection: \(A\cap B\), i.e. \(\{x\mid x\in A\wedge x\in B\}\)\\
+Union: \(A\cup B\), i.e. \(\{x\mid x\in A \vee x\in B\}\)\\
+Complement, \(A^{c}\), Difference set: \(A\backslash  B\), i.e. \(\{x\mid x\in A\wedge x\notin B\}\)\\
+Symmetric difference of \(A\) and \(B\), \(A\Delta B\): \((A\cup B)\backslash(A\cap B)\equiv (A\backslash B)\cup(B\backslash A)\)
+\subsubsection{Collections and Families}
+\begin{align*}
+	&\bigcap_{i\in I}S_i\equiv\{x\mid\forall i\in I,x\in S_i\}\\
+	&\bigcup_{i\in I}S_i\equiv\{x\mid\exists i\in I,x\in S_i\}\\
+	&\bigcap\mathscr{F}\equiv\{x\mid\forall X\in\mathscr{F}(x\in X)\}
+\end{align*}
+\subsection{Disjoint sets}
+Sets \(A\) and \(B\) are disjoint if \(A\cap B=\emptyset\)
+\subsection{Laws of sets and collections}
+\subsubsection{Distrubutive laws}
+\begin{align*}
+	&A\cup(B\cap C)=(A\cap B)\cup(A\cap C)\\
+	&A\cap(B\cup C)=(A\cup B)\cap(A\cup C)
+\end{align*}
+\subsubsection{Demorgan's laws}
+\begin{align*}
+	&\neg(A\cap B)=\neg A\cup \neg B\\
+	&\neg(A\cup B)=\neg A\cap \neg B\\\\
+	&\left(\bigcup_{i\in I}S_i\right)^{c}=\bigcap_{i\in I}S_{i}^{c}\\
+	&\left(\bigcap_{i\in I}S_i\right)^{c}=\bigcup_{i\in I}S_{i}^{c}
+\end{align*}
+\subsection{Cartesian product}
+\begin{align*}
+	&A\times B = \{(a,b)\mid a\in A, b\in B\}\\
+	&\begin{aligned} S_1\times S_2\times\ldots S_n&=\{(s_1,s_2,\ldots,s_n)\mid s_1\in S_1, s_2\in S_2,\ldots, s_n\in S_n\}\\
+	&=\prod_{i=1}^{n}S_i\end{aligned}
+\end{align*}
+\subsection{Partitions}
+A partition of a nonempty set \(S\) is a collection \(\mathscr{L}\) of nonempty mutually disjoint subsets \(B_i\) such that:
+\begin{displaymath}
+	\mathscr{L}=\{B_i \mid i\in I\} \text{ and } \bigcup_{i\in I}B_i=S
+\end{displaymath}
+The sets \(B_i\) are called blocks of the partition.
+\subsection{Quantifiers}
+\subsubsection{Universal quantifier}
+The universal quantifier is \(\forall\). The statement \(\forall xP(x)\) means \(P(x)\) is true for all \(x\in U\), i.e.\\\(\{x\in U\mid P(x)\}=U\) is true.
+\subsubsection{Existential quantifier}
+The existential quantifier is \(\exists\). The statement \(\exists xP(x)\) means that there exists \(x\in U\) such that \(P(x)\), i.e. \(\{x\in U\mid P(x)\}\neq\emptyset\) is true.
+\subsubsection{Unique existence}
+\begin{displaymath}
+	\exists !xP(x)\equiv \exists x(P(x)\wedge\neg\exists y(P(y)\wedge x\neq y))
+\end{displaymath}
+\subsubsection{Quantifier negation laws}
+\begin{align*}
+	&\neg\exists xP(x)\equiv\forall x\neg P(x)\\
+	&\neg\forall xP(x)\equiv\exists x\neg P(x)
+\end{align*}
+\subsubsection{Commutivity of quantifiers}
+Like quantifiers are commutative. For example, \(\exists y\exists x\equiv\exists x\exists y\) and \(\forall y\forall x\equiv\forall x\forall y\).
+\subsection{Subsets}
+\begin{displaymath}
+	A\subseteq B\Rightarrow \forall x(x\in A\Rightarrow x\in B)
+\end{displaymath}
+\subsection{Implication}
+\(Q\) implies \(P\)
+\begin{displaymath}
+	Q\Rightarrow P
+\end{displaymath}
+If \emph{antecedent} \(P\), then \emph{consequence} \(Q\).
+\begin{align*}
+	&P\Rightarrow Q &&\begin{aligned}\text{Converse}\end{aligned}\\
+	&\neg P\Rightarrow\neg Q &&\begin{aligned}\text{Contrapositive}\end{aligned}
+\end{align*}
+The double implication \(\Leftrightarrow\), otherwise known as \emph{iff}, can be expressed as \(P\Leftrightarrow Q\equiv(P\Rightarrow Q)\wedge(Q\Rightarrow P)\)
+\section{Proof catagories}
+\subsubsection{Direct proof}
+Assuming antecedent \(P\), prove consequence \(Q\)
+\begin{displaymath}
+	P\Rightarrow Q
+\end{displaymath}
+\subsubsection{Indirect Proof}
+Indirect proofs consist of two proof types: proof by contrapositive, and proof by contradiction. Both start by assuming the consequence is false, and using it as the antecedent. Proof by contrapositive proves the antecedent must be false following a false consequence (\(\neg Q\Rightarrow\neg P\)), and proof by contradiction proves a false consequence contradicts a true antecedent(\(\neg Q\Rightarrow\!\Leftarrow P\)). Indirect Proofs are often suitable when dealing with concepts defined in terms of negations, such as "infinite" (not finite), "irrational" (not rational), and "prime", (>1 and not composite).
+\begin{displaymath}
+\end{displaymath}
+\subsubsection{Existence and uniqueness proofs}
+\subsubsection{Tips and tricks}
+Begin by stating the antecedents in a way logically equivalent(directly, or contrapositively) to the implication you are proving. Expand from there until you reach the desired consequence. Then restate that the antecedent implies the consequence. Lastly, if the antecedents are different than those of the original implication, explain how the proved implication is logically equivalent to the original implication, e.g. "the theorem follows by the logical equivalence of the implication and its contrapositive".
+\subsubsection{Proofs involving quantifiers}
+A universal quantifier specifies for all \(x\), \(P(x)\), and prove \(P(x)\). Example: Let \(x\) be arbitary (prove \(P(x)\)). Then for all \(x\), \(P(x)\). Don't put restrictions on x, givens should only aid in understanding how the objects in the goal relate to each other.
+\subsection{}
+
+
+\end{document}

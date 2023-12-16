@@ -11,6 +11,7 @@ from streaming_form_data.targets import FileTarget
 from app.app import App
 from app.responses import rbody, rstart200_json, rstart201_html
 
+logger = logging.getLogger(__name__)
 
 class MaxSizeValidator:
     _chunksize = 0
@@ -22,7 +23,7 @@ class MaxSizeValidator:
     def callback(self, chunk: bytes) -> None:
         self._chunksize += len(chunk)
         if self._chunksize > self._max_size:
-            logging.debug("rolling back new file on disk")
+            logger.debug("rolling back new file on disk")
             self._filepath.unlink(missing_ok=True)
             raise ValueError("maximum file size exceeded")
 
@@ -125,5 +126,8 @@ async def delete_asset(scope, recieve, send):
         else:
             raise ValueError("invalid querystring: mandatory parameters missing")
         filepath = assetsdir / (str(pk) + ".tex")
-        logging.debug("deleting" + abspath(filepath))
+        logger.debug("deleting" + abspath(filepath))
         filepath.unlink(missing_ok=True)
+
+    await send(rstart201_html)
+    await send(rbody(None))

@@ -6,6 +6,7 @@ import logging
 from psycopg import sql
 from psycopg_pool import AsyncConnectionPool
 
+logger = logging.getLogger(__name__)
 
 class Repository(AbstractAsyncContextManager):
     # implement tpc transactions
@@ -26,10 +27,10 @@ class Repository(AbstractAsyncContextManager):
     async def __aexit__(self, exec_type, exec_value, traceback):
         assert isinstance(self._aconnpool, AsyncConnectionPool)
         if exec_type:
-            logging.debug("aborting transaction")
+            logger.debug("aborting transaction")
             await self._aconn.rollback()
         else:
-            logging.debug("commiting transaction")
+            logger.debug("commiting transaction")
             await self._aconn.commit()
         await self._aconnpool.putconn(self._aconn)
 
@@ -63,8 +64,8 @@ class Repository(AbstractAsyncContextManager):
             colref2=sql.Identifier(orderby),
         )
         async with self._aconn.cursor() as acur:
-            logging.debug("executing query: " + query.as_string(None))
             await acur.execute(query, (value, limit, offset))
+            logger.debug("acur execute: " + query.as_string(acur))
             query_response = await acur.fetchall()
         if not encoding:
             return query_response
@@ -91,26 +92,26 @@ class Repository(AbstractAsyncContextManager):
             placeholders=sql.SQL(", ").join(sql.Placeholder() * len(columns)),
         )
         async with self._aconn.cursor() as acur:
-            logging.debug("executing query: " + query.as_string(None))
             await acur.execute(query, values)
+            logger.debug("acur execute: " + query.as_string(acur))
             query_response = await acur.fetchone()
         if returning and not encoding:
             return query_response
         else:
             return json.dumps(query_response).encode(encoding)
 
-    async def delete(self, column: str, value: str) -> None:
+    async def delete(self, columns: list[str], values: list[str]) -> None:
         query = sql.SQL(
             """
-            DELETE FROM notes.{tableref} WHERE {colref} = %s
+            DELETE FROM notes.{tableref} WHERE ({expression})
             """
         ).format(
             tableref=sql.Identifier(self._table),
-            colref=sql.Identifier(column),
+            expression=sql.SQL(" and ").join(sql.Identifier(n) + sql.SQL(" = ") + sql.Placeholder() for n in columns),
         )
         async with self._aconn.cursor() as acur:
-            logging.debug("executing query: " + query.as_string(None))
-            await acur.execute(query, value)
+            await acur.execute(query, values)
+            logger.debug("acur execute: " + query.as_string(acur))
 
 
 class AssetsRepository(Repository):
