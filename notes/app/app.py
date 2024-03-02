@@ -125,10 +125,10 @@ class App:
         for arg in args:
             key = arg[0]
             value = arg[1]
-            t = arg[2]
+            typ = arg[2]
             if not value:
                 raise ValueError("invalid querystring: empty parameter")
-            match t:
+            match typ:
                 case "string":
                     valid_args[key] = value
                 case "int":
@@ -191,31 +191,45 @@ class App:
         return wrapper
 
 class Request(ABC):
-    _route: list | None = None
+    _middleware_data: dict = {}
     def __init__(self, scope, recieve, send):
         self._scope = scope
         self._recieve = recieve
         self._send = send
 
-    #work after initialization
     @property
-    def route(self) -> list | None:
-        if self._route:
-            return self._route.copy()
-        else:
-            return None
+    def scope(self):
+        return self._scope.copy()
 
 class Middleware(ABC):
     _middleware_type = None
     _nice = 3
+    _deps = None
     def __init__(self):
         pass
 
     async def run(self, request: Request) -> Request:
         return request
 
+class Pipe:
+    def __init__(self, middleware):
+        self._middleware = middleware
+
+    async def run(self, request: Request):
+        try:
+            async for m in self._middleware:
+                request = await self._middleware.run(request)
+            await self._finalize(request)
+        except Exception as e:
+            pass
+
+    async def _finalize(self, Request):
+        Request
+
 class MidApp:
-    _middleware: list[Middleware]  = []
+    _middleware: list[Middleware] = []
+    _pipe: Pipe | None = None
+
     def __init__(self):
         for m in self._middleware:
             pass
@@ -224,7 +238,6 @@ class MidApp:
     def add_middleware(cls, middleware):
         if isinstance(middleware, Middleware):
             cls._middleware.append(middleware)
-            cls._sort(cls._middleware)
         else:
             raise ValueError("invalid add_middleware")
 
@@ -235,14 +248,8 @@ class MidApp:
         # callback
         pass
 
-    async def _pipe(self, request: Request) -> Request:
-        # run request through each middleware, return request
-        return request
-
-    async def _initialize_middleware(self):
-        pass
-
-    def _sort(self, middleware):
-        for m in middleware:
+    def _initialize_pipe(self):
+        middleware = sorted(self._middleware, key=lambda mw: mw._nice)
+        self._pipe = Pipe(middleware)
             
 
