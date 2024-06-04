@@ -3,3 +3,4 @@ app/assets/*
 site/srv/*
 site/build/*
 *.swp
+.DS_Store

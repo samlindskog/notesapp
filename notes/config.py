@@ -3,7 +3,7 @@ import uvicorn
 from psycopg.rows import dict_row
 
 from psycopg_pool import AsyncConnectionPool
-from repository.objects import AssetsRepository, ProfilesRepository
+from repository.objects import AssetsRepository, ProfilesRepository, Repository
 from app.app import App
 
 maindir = PosixPath(__file__).parent
@@ -45,12 +45,17 @@ class Resources:
         return self._aconnpool
 
     @property
+    def repository(self):
+        return Repository.use_async_connection_pool(self._aconnpool)
+
+    @property
     def profiles(self):
         return ProfilesRepository.use_async_connection_pool(self._aconnpool)
 
     @property
     def assets(self):
         return AssetsRepository.use_async_connection_pool(self._aconnpool)
+
 
     @property
     def app(self):

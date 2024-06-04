@@ -9,10 +9,11 @@ from psycopg_pool import AsyncConnectionPool
 logger = logging.getLogger(__name__)
 
 class Repository(AbstractAsyncContextManager):
-    # implement tpc transactions
-    _xid = None
     _table = ""
     _aconnpool = None
+
+    def __init__(self, table: str):
+        self._table = table
 
     @classmethod
     def use_async_connection_pool(cls, aconnpool: AsyncConnectionPool):
@@ -22,7 +23,7 @@ class Repository(AbstractAsyncContextManager):
     async def __aenter__(self):
         assert isinstance(self._aconnpool, AsyncConnectionPool)
         self._aconn = await self._aconnpool.getconn()
-        return self
+        return self._aconn
 
     async def __aexit__(self, exec_type, exec_value, traceback):
         assert isinstance(self._aconnpool, AsyncConnectionPool)

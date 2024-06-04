@@ -10,6 +10,8 @@ oauthlib = {extras = ["signedtoken"], version = "*"}
 pyjwt = "*"
 streaming-form-data = "*"
 black = "*"
+pdf2image = "*"
+pillow = "*"
 
 [dev-packages]
 

@@ -19,7 +19,6 @@ matches a request query string against expected args, and checks if their type i
 https://asgi.readthedocs.io/en/latest/specs/www.html for more details.
 """
 class App:
-    # [scope_key: str]
     # consolidate this with _routes
     _route_scope_keys = []
     # [[path: str, [scope_value: str], Callable]]
@@ -89,12 +88,13 @@ class App:
                 )
         except ValueError as e:
             await send(rstart400_html)
-            await send(rbody("Error 400: bad request :(".encode("utf-8")))
+            await send(rbody("Error 400: bad request".encode("utf-8")))
             raise e
 
     # parse querystring to dictionary and decode b"key":[b"value"] pairs
     # maybe this shouldn't be a seperate function
     def _querystring_decode(self, query_string: bytes) -> dict[str, str]:
+        print(query_string)
         query_dictionary = parse_qs(query_string, strict_parsing=True, errors="strict")
         return {
             k.decode("utf-8"): v[0].decode("utf-8") for k, v in query_dictionary.items()
@@ -110,11 +110,13 @@ class App:
     throws exceptions when params matching target_args are invalid, or if querystring itself
     is invalid
     """
-    # this deserves a second glance, pretty sure it is poopoo
+    # this deserves a second glance it is poopoo
 
     def _querystring_argparser(
         self, query_string: bytes, target_args: dict[str, str]
     ) -> dict[str, str]:
+        if query_string == b"":
+            return {}
         query_dictionary = self._querystring_decode(query_string)
         args = [
             [k, v, target_args[k]]
@@ -175,13 +177,13 @@ class App:
         qs_args: dict[str, str] = {},
     ) -> Callable[[asgi_app], asgi_app]:
         def wrapper(fn):
-            # scope params that are safely mutable
             mscope_params = scope_params or {}
             scope_items = mscope_params.items()
             scope_keys = [k for k, v in scope_items]
             scope_keys.sort()
             if not cls._routes:
                 cls._route_scope_keys = scope_keys
+            # ensure all routes are using the same scope keys.
             elif cls._routes[-1] and scope_keys != cls._route_scope_keys:
                 raise ValueError("App.route param keys differ")
             # list of routes
@@ -189,67 +191,3 @@ class App:
             return fn
 
         return wrapper
-
-class Request(ABC):
-    _middleware_data: dict = {}
-    def __init__(self, scope, recieve, send):
-        self._scope = scope
-        self._recieve = recieve
-        self._send = send
-
-    @property
-    def scope(self):
-        return self._scope.copy()
-
-class Middleware(ABC):
-    _middleware_type = None
-    _nice = 3
-    _deps = None
-    def __init__(self):
-        pass
-
-    async def run(self, request: Request) -> Request:
-        return request
-
-class Pipe:
-    def __init__(self, middleware):
-        self._middleware = middleware
-
-    async def run(self, request: Request):
-        try:
-            async for m in self._middleware:
-                request = await self._middleware.run(request)
-            await self._finalize(request)
-        except Exception as e:
-            pass
-
-    async def _finalize(self, Request):
-        Request
-
-class MidApp:
-    _middleware: list[Middleware] = []
-    _pipe: Pipe | None = None
-
-    def __init__(self):
-        for m in self._middleware:
-            pass
-    
-    @classmethod
-    def add_middleware(cls, middleware):
-        if isinstance(middleware, Middleware):
-            cls._middleware.append(middleware)
-        else:
-            raise ValueError("invalid add_middleware")
-
-    async def run(self, scope, recieve, send):
-        # gateway between asgi and app-internal request framework. instantiates new
-        # request, and runs it through pipeline. catch errors, send appropriate error
-        # http responses (404, 400, etc.). if pipeline runs successfully, run request
-        # callback
-        pass
-
-    def _initialize_pipe(self):
-        middleware = sorted(self._middleware, key=lambda mw: mw._nice)
-        self._pipe = Pipe(middleware)
-            
-

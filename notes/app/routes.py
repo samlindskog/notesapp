@@ -28,6 +28,7 @@ class MaxSizeValidator:
             raise ValueError("maximum file size exceeded")
 
 
+#not using this rn for anything, but it do work.
 async def parse_file_to_disk(
     recieve: uvc_recieve,
     headers: dict[str, str],
@@ -46,7 +47,7 @@ async def parse_file_to_disk(
         parser.data_received(data.get("body", b""))
         more_body = data.get("more_body", False)
 
-
+#not using this either
 async def read_body(receive: uvc_recieve) -> str:
     body = b""
     more_body = True
@@ -56,11 +57,24 @@ async def read_body(receive: uvc_recieve) -> str:
         more_body = message.get("more_body", False)
     return body.decode("utf-8")
 
-
 @App.route(
-    r"^/profiles/(.+)/?.*$",
-    scope_params={"method": "GET"},
-    qs_args={"orderby": "string", "limit": "int", "offset": "int", "desc": "bool"},
+        r"^/assets$"
+        )
+async def assets(scope, recieve, send):
+    repository = scope["state"]["repository"]
+    
+    async with repository("profiles") as conn:
+        async with conn.cursor() as acur:
+            await acur.execute("SELECT * FROM notes.profiles")
+            recordset = await acur.fetchall()
+            await send(rstart200_json)
+            await send(rbody(json.dumps(recordset).encode("utf_8")))
+
+'''
+@App.route(
+    r"^/profiles/(.+)/?.*$"
+    #scope_params={"method": "GET"},
+    #qs_args={"orderby": "string", "limit": "int", "offset": "int", "desc": "bool"},
 )
 async def get_profiles(scope, recieve, send):
     profiles = scope["state"]["profiles"]
@@ -76,58 +90,4 @@ async def get_profiles(scope, recieve, send):
             await send(rbody(json.dumps(response_body).encode("utf_8")))
     else:
         raise ValueError("invalid querystring: mandatory parameters missing")
-
-
-@App.route(
-    r"^/assets/upload/?.*$",
-    scope_params={"method": "POST"},
-    qs_args={"uname": "string", "title": "string", "parentpk": "string"},
-)
-async def post_asset(scope, recieve, send):
-    assets = scope["state"]["assets"]
-    querystring_args = scope["qs_args"]
-
-    uname = querystring_args.get("uname", "")
-    parentid = querystring_args.get("parentpk", "")
-    title = querystring_args.get("title", "")
-
-    async with assets() as a:
-        if uname and parentid:
-            new_row = await a.insert(
-                ["uname", "parentpk"], [uname, parentid], returning=True, encoding=None
-            )
-            pk = new_row["pk"]
-        elif uname and title:
-            new_row = await a.insert(
-                ["uname", "title"], [uname, title], returning=True, encoding=None
-            )
-            pk = new_row["pk"]
-        else:
-            raise ValueError("invalid querystring: mandatory parameters missing")
-        filepath = assetsdir / (str(pk) + ".tex")
-        headers = {a.decode("utf-8"): b.decode("utf-8") for a, b in scope["headers"]}
-        await parse_file_to_disk(recieve, headers, filepath, max_size=10000000)
-
-    await send(rstart201_html)
-    await send(rbody(None))
-
-
-@App.route(
-    r"^/assets/upload/?.*$", scope_params={"method": "DELETE"}, qs_args={"pk": "string"}
-)
-async def delete_asset(scope, recieve, send):
-    assets = scope["state"]["assets"]
-    querystring_args = scope["qs_args"]
-
-    pk = querystring_args.get("pk", "")
-    async with assets() as a:
-        if pk:
-            await a.delete("pk", pk)
-        else:
-            raise ValueError("invalid querystring: mandatory parameters missing")
-        filepath = assetsdir / (str(pk) + ".tex")
-        logger.debug("deleting" + abspath(filepath))
-        filepath.unlink(missing_ok=True)
-
-    await send(rstart201_html)
-    await send(rbody(None))
+'''

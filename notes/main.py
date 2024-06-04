@@ -1,4 +1,5 @@
 import logging
+import pdb
 import uvicorn
 from config import config_factory, Resources
 
@@ -13,8 +14,7 @@ async def lifespan(scope, receive, send):
             resources = Resources()
             await resources.current_pool.open(wait=True, timeout=5)
             # initialized repository classes loaded
-            scope["state"]["assets"] = resources.assets
-            scope["state"]["profiles"] = resources.profiles
+            scope["state"]["repository"] = resources.repository
             # initialized app instance loaded
             scope["state"]["app"] = resources.app()
 
