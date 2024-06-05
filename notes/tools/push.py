@@ -1,3 +1,4 @@
+import pdb
 import sys
 import pathlib as pl
 import argparse
@@ -52,14 +53,26 @@ def delete_assets(title):
 with psycopg.connect(conninfo=config._conninfo, row_factory=dict_row) as conn:
     with conn.cursor() as cur:
         if delete:
+            cur.execute("SELECT * FROM notes.assets WHERE title=%s", [title])
+            recordset = cur.fetchall()
+            if recordset == []:
+                raise Exception("no such title")
+            uuid = str(recordset[0]["id"])
+            # delete assets and db entry
+            delete_assets(uuid)
             cur.execute("DELETE FROM notes.assets WHERE title=%s", [title])
-            delete_assets(title)
         else:
+            # check if title already exists
             cur.execute("SELECT * FROM notes.assets WHERE title=%s", [title])
             recordset = cur.fetchall()
             if not recordset == []:
-                cur.execute("DELETE FROM notes.assets WHERE title=%s", [title])
-            cur.execute("INSERT INTO notes.assets (title) VALUES (%s)", [title])
-            ingest_file(file_path, title)
-            # add new pdf and update time
-
+                # update timestamp
+                cur.execute("UPDATE notes.assets SET dt=current_timestamp(0) WHERE title=%s", [title])
+            else:
+                # create new db entry
+                cur.execute("INSERT INTO notes.assets (title) VALUES (%s)", [title])
+            # add assets to assetsdir
+            cur.execute("SELECT * FROM notes.assets WHERE title=%s", [title])
+            recordset = cur.fetchall()
+            uuid = str(recordset[0]["id"])
+            ingest_file(file_path, uuid)

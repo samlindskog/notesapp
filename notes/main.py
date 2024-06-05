@@ -1,5 +1,4 @@
 import logging
-import pdb
 import uvicorn
 from config import config_factory, Resources
 

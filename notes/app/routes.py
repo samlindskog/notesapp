@@ -1,15 +1,14 @@
-import pdb
+import os
 import json
 import logging
 from pathlib import Path
 from os.path import abspath
-
 from app._types import uvc_recieve
-from config import assetsdir
 from streaming_form_data import StreamingFormDataParser
 from streaming_form_data.targets import FileTarget
 from app.app import App
-from app.responses import rbody, rstart200_json, rstart201_html
+from app.responses import rbody, rstart200_json, rstart200_jpeg, rstart200_pdf
+import config
 
 logger = logging.getLogger(__name__)
 
@@ -58,17 +57,43 @@ async def read_body(receive: uvc_recieve) -> str:
     return body.decode("utf-8")
 
 @App.route(
-        r"^/assets$"
+        r"^/assets/list$",
+        scope_params={"method": "GET"}
         )
-async def assets(scope, recieve, send):
+async def assets_list(scope, recieve, send):
     repository = scope["state"]["repository"]
-    
     async with repository("profiles") as conn:
         async with conn.cursor() as acur:
-            await acur.execute("SELECT * FROM notes.profiles")
+            await acur.execute("SELECT * FROM notes.assets")
             recordset = await acur.fetchall()
             await send(rstart200_json)
-            await send(rbody(json.dumps(recordset).encode("utf_8")))
+            await send(rbody(json.dumps(recordset, default=str).encode("utf_8")))
+
+@App.route(
+        r"^/assets/([^\.]+)*(\..*)*$",
+        scope_params={"method": "GET"}
+        )
+async def assets_thumbnail(scope, recieve, send):
+    # for detecting file extension for correct mime type
+    filename = scope["group"][0]
+    extension = scope["group"][1]
+    
+    if not (filename and extension):
+        raise ValueError("Bad filename")
+
+    if not os.path.exists(config.assetsdir / (filename + extension)):
+        raise ValueError("Asset does not exist")
+    
+    if extension == ".jpg":
+        with open(config.assetsdir / (filename + ".jpg"), "rb") as f:
+             file_bytes = f.read()
+             await send(rstart200_jpeg)
+             await send(rbody(file_bytes))
+    if extension == ".pdf":
+        with open(config.assetsdir / (filename + ".pdf"), "rb") as f:
+             file_bytes = f.read()
+             await send(rstart200_pdf)
+             await send(rbody(file_bytes))
 
 '''
 @App.route(

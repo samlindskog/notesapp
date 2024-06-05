@@ -44,6 +44,23 @@ rstart200_html = {
         [b"content-type", b"text/plain; charset=utf-8"],
     ],
 }
+
+rstart200_jpeg = {
+    "type": "http.response.start",
+    "status": 200,
+    "headers": [
+        [b"content-type", b"image/jpeg"],
+    ],
+}
+
+rstart200_pdf = {
+    "type": "http.response.start",
+    "status": 200,
+    "headers": [
+        [b"content-type", b"application/pdf"],
+    ],
+}
+
 rstart201_html = {
     "type": "http.response.start",
     "status": 201,
@@ -51,7 +68,6 @@ rstart201_html = {
         [b"content-type", b"text/plain; charset=utf-8"],
     ],
 }
-
 
 def rbody(
     body: bytes | None, more: bool = False
