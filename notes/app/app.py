@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Callable
+from typing import Any, Callable
 from app._types import uvc_scope, uvc_recieve, uvc_send, asgi_app
 from urllib.parse import parse_qs
 from app.responses import rstart404_html, rstart400_html, rbody
@@ -28,6 +28,7 @@ class App:
 
     async def run(self, scope: uvc_scope, recieve: uvc_recieve, send: uvc_send) -> None:
         try:
+            print(scope["headers"])
             current_path = scope["path"]
             current_scope_values = [scope[k] for k in self._route_scope_keys]
             # sorted for match against route_scope_values
@@ -171,7 +172,7 @@ class App:
     def route(
         cls,
         path: str,
-        scope_params: dict[str, str] | None = None,
+        scope_params: dict[str, Any] | None = None,
         qs_args: dict[str, str] = {},
     ) -> Callable[[asgi_app], asgi_app]:
         def wrapper(fn):

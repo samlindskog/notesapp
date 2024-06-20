@@ -1,5 +1,5 @@
 site/node_modules
-app/assets/*
+notes/assets/*
 site/srv/*
 site/build/*
 *.swp

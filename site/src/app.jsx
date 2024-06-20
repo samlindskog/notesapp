@@ -1,16 +1,26 @@
-import React from "react"
+import React, {useState} from "react"
+import { useEffect } from "react"
 
-function App() {
+export function App() {
 	return(
-		<>
-		<Thumbnail></Thumbnail>
-		</>
+		<ThumbnailContainer></ThumbnailContainer>
 	)
 }
 
-function Thumbnail() {
-	return(<object data="https://research.google.com/pubs/archive/44678.pdf"
-   width="800" height="600"></object>)
+
+function ThumbnailContainer({children}) {
+	assetsList = fetch("http://72.14.178.40/assets/list", 
+		{method: "GET", headers: {"Content-Type": "application/json"}}).then(res => {return res.json()})
+	.catch(err => {console.log(err); return []})
+
+	console.log(assetsList)
+
+ 	const [notes, setNotes] = useState([])
+
+	return(
+		<div>
+			{children}
+		</div>
+	)
 }
 
-export { App }

@@ -1,3 +1,4 @@
+import pdb
 import os
 import json
 import logging
@@ -62,7 +63,7 @@ async def read_body(receive: uvc_recieve) -> str:
         )
 async def assets_list(scope, recieve, send):
     repository = scope["state"]["repository"]
-    async with repository("profiles") as conn:
+    async with repository() as conn:
         async with conn.cursor() as acur:
             await acur.execute("SELECT * FROM notes.assets")
             recordset = await acur.fetchall()
@@ -70,10 +71,10 @@ async def assets_list(scope, recieve, send):
             await send(rbody(json.dumps(recordset, default=str).encode("utf_8")))
 
 @App.route(
-        r"^/assets/([^\.]+)*(\..*)*$",
+        r"^/assets/([^\.]+)*(\..+)*$",
         scope_params={"method": "GET"}
         )
-async def assets_thumbnail(scope, recieve, send):
+async def assets(scope, recieve, send):
     # for detecting file extension for correct mime type
     filename = scope["group"][0]
     extension = scope["group"][1]
@@ -95,11 +96,47 @@ async def assets_thumbnail(scope, recieve, send):
              await send(rstart200_pdf)
              await send(rbody(file_bytes))
 
+@App.route(
+        r"^.*$",
+        scope_params={"method": "OPTIONS"}
+        )
+async def cors(scope, recieve, send):
+    def is_cors_header(h):
+        cors_headers = [
+                b"access-control-request-headers",
+                b"access-control-request-method",
+                ]
+        for header in cors_headers:
+            if h == header:
+                return True
+
+    headers = [i[0] for i in scope["headers"]]
+    cors_headers = [i for i in headers if is_cors_header(i)]
+
+    if not cors_headers:
+        raise ValueError("No CORS headers present")
+
+    rstart200_cors = {
+        "type": "http.response.start",
+        "status": 200,
+        "headers": [
+            [b"content-type", b"text/plain"],
+            [b"Access-Control-Allow-Origin", b"*"],
+            [b"Access-Control-Allow-Method", b"GET"],
+            [b"Access-Control-Allow-Headers", b"*"],
+            [b"Access-Control-Expose-Headers", b"*"],
+        ]
+    }
+    
+    await send(rstart200_cors)
+    await send(rbody(b""))
+
+
 '''
 @App.route(
     r"^/profiles/(.+)/?.*$"
-    #scope_params={"method": "GET"},
-    #qs_args={"orderby": "string", "limit": "int", "offset": "int", "desc": "bool"},
+    scope_params={"method": "GET"},
+    qs_args={"orderby": "string", "limit": "int", "offset": "int", "desc": "bool"},
 )
 async def get_profiles(scope, recieve, send):
     profiles = scope["state"]["profiles"]

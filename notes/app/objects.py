@@ -5,11 +5,7 @@ from psycopg_pool import AsyncConnectionPool
 logger = logging.getLogger(__name__)
 
 class Repository(AbstractAsyncContextManager):
-    _table = ""
     _aconnpool = None
-
-    def __init__(self, table: str):
-        self._table = table
 
     @classmethod
     def use_async_connection_pool(cls, aconnpool: AsyncConnectionPool):
