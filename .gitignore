@@ -1,6 +1,7 @@
 site/node_modules
-notes/assets/*
 site/srv/*
 site/build/*
+notes/assets/*
+notes/config.py
 *.swp
 .DS_Store
