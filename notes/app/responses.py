@@ -34,7 +34,11 @@ rstart200_json = {
     "status": 200,
     "headers": [
         [b"content-type", b"application/ld+json"],
-    ],
+        [b"Access-Control-Allow-Origin", b"*"],
+        [b"Access-Control-Allow-Method", b"GET"],
+        [b"Access-Control-Allow-Headers", b"*"],
+        [b"Access-Control-Expose-Headers", b"*"],
+    ]
 }
 
 rstart200_html = {
@@ -50,7 +54,11 @@ rstart200_jpeg = {
     "status": 200,
     "headers": [
         [b"content-type", b"image/jpeg"],
-    ],
+        [b"Access-Control-Allow-Origin", b"*"],
+        [b"Access-Control-Allow-Method", b"GET"],
+        [b"Access-Control-Allow-Headers", b"*"],
+        [b"Access-Control-Expose-Headers", b"*"],
+    ]
 }
 
 rstart200_pdf = {
@@ -58,7 +66,11 @@ rstart200_pdf = {
     "status": 200,
     "headers": [
         [b"content-type", b"application/pdf"],
-    ],
+        [b"Access-Control-Allow-Origin", b"*"],
+        [b"Access-Control-Allow-Method", b"GET"],
+        [b"Access-Control-Allow-Headers", b"*"],
+        [b"Access-Control-Expose-Headers", b"*"],
+    ]
 }
 
 rstart201_html = {
