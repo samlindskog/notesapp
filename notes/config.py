@@ -22,7 +22,7 @@ def config_factory(config):
     )
 
 
-_conninfo = "postgresql://samuellindskog@127.0.0.1:5432/notesappdev"
+_conninfo = "postgresql://notesapp@127.0.0.1:5432/notesapp"
 _connectargs = {"row_factory": dict_row}
 
 async_pool_config = {
