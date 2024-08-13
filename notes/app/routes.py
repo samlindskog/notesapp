@@ -8,7 +8,7 @@ from app._types import uvc_recieve
 from streaming_form_data import StreamingFormDataParser
 from streaming_form_data.targets import FileTarget
 from app.app import App
-from app.responses import rbody, rstart200_json, rstart200_jpeg, rstart200_pdf
+from app.responses import rbody, rstart200_json, rstart200_jpeg, rstart200_pdf, rstart200_text
 import config
 
 logger = logging.getLogger(__name__)
@@ -57,11 +57,17 @@ async def read_body(receive: uvc_recieve) -> str:
         more_body = message.get("more_body", False)
     return body.decode("utf-8")
 
+def privleged(fn):
+    async def wrapper(scope, recieve, send):
+        await fn(scope, recieve, send)
+    return wrapper
+
+
 @App.route(
         r"^/assets/list$",
         scope_params={"method": "GET"}
         )
-async def assets_list(scope, recieve, send):
+async def assetlist_get(scope, recieve, send):
     repository = scope["state"]["repository"]
     async with repository() as conn:
         async with conn.cursor() as acur:
@@ -74,7 +80,7 @@ async def assets_list(scope, recieve, send):
         r"^/assets/([^\.]+)*(\..+)*$",
         scope_params={"method": "GET"}
         )
-async def assets(scope, recieve, send):
+async def asset_get(scope, recieve, send):
     # for detecting file extension for correct mime type
     filename = scope["group"][0]
     extension = scope["group"][1]
@@ -84,23 +90,23 @@ async def assets(scope, recieve, send):
 
     if not os.path.exists(config.assetsdir / (filename + extension)):
         raise ValueError("Asset does not exist")
-    
-    if extension == ".jpg":
-        with open(config.assetsdir / (filename + ".jpg"), "rb") as f:
-             file_bytes = f.read()
-             await send(rstart200_jpeg)
-             await send(rbody(file_bytes))
-    if extension == ".pdf":
-        with open(config.assetsdir / (filename + ".pdf"), "rb") as f:
-             file_bytes = f.read()
-             await send(rstart200_pdf)
-             await send(rbody(file_bytes))
+
+    with open(config.assetsdir / (filename + extension), "rb") as f:
+        file_bytes = f.read()
+        match extension:
+            case ".jpg":
+                await send(rstart200_jpeg)
+            case ".pdf":
+                await send(rstart200_pdf)
+            case ".md":
+                await send(rstart200_text)
+        await send(rbody(file_bytes))
 
 @App.route(
         r"^.*$",
         scope_params={"method": "OPTIONS"}
         )
-async def cors(scope, recieve, send):
+async def cors_options(scope, recieve, send):
     def is_cors_header(h):
         cors_headers = [
                 b"access-control-request-headers",

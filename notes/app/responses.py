@@ -73,6 +73,18 @@ rstart200_pdf = {
     ]
 }
 
+rstart200_text = {
+    "type": "http.response.start",
+    "status": 200,
+    "headers": [
+        [b"content-type", b"text/plain"],
+        [b"Access-Control-Allow-Origin", b"*"],
+        [b"Access-Control-Allow-Method", b"GET"],
+        [b"Access-Control-Allow-Headers", b"*"],
+        [b"Access-Control-Expose-Headers", b"*"],
+    ]
+}
+
 rstart201_html = {
     "type": "http.response.start",
     "status": 201,
