@@ -1,5 +1,6 @@
 from pathlib import PosixPath
 import uvicorn
+from jinja2 import Environment, PackageLoader
 from psycopg.rows import dict_row
 
 from psycopg_pool import AsyncConnectionPool
@@ -8,7 +9,7 @@ from app.app import App
 
 maindir = PosixPath(__file__).parent
 assetsdir = maindir / "assets"
-
+endpoint = "72.14.178.40"
 
 def config_factory(config):
     match config:
@@ -25,6 +26,7 @@ def config_factory(config):
 _conninfo = "postgresql://notesapp@127.0.0.1:5432/notesapp"
 _connectargs = {"row_factory": dict_row}
 
+
 async_pool_config = {
     "conninfo": _conninfo,
     "min_size": 2,
@@ -39,6 +41,10 @@ async_pool_config = {
 class Resources:
     def __init__(self):
         self._aconnpool = AsyncConnectionPool(**async_pool_config)
+
+    @property
+    def template_env(self):
+        return Environment(loader=PackageLoader("main.py"), autoescape=False)
 
     @property
     def current_pool(self):

@@ -14,6 +14,8 @@ async def lifespan(scope, receive, send):
             await resources.current_pool.open(wait=True, timeout=5)
             # initialized repository classes loaded
             scope["state"]["repository"] = resources.repository
+            # initialized jinja environment loaded
+            scope["state"]["template_env"] = resources.template_env
             # initialized app instance loaded
             scope["state"]["app"] = resources.app()
 

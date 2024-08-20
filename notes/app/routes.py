@@ -4,12 +4,23 @@ import json
 import logging
 from pathlib import Path
 from os.path import abspath
+
+import config
 from app._types import uvc_recieve
+from app.app import App
+from app.responses import (
+    rbody,
+    rstart200_json,
+    rstart200_jpeg,
+    rstart200_pdf,
+    rstart200_text,
+    rstart400_html,
+    rstart200_html,
+)
+
 from streaming_form_data import StreamingFormDataParser
 from streaming_form_data.targets import FileTarget
-from app.app import App
-from app.responses import rbody, rstart200_json, rstart200_jpeg, rstart200_pdf, rstart200_text
-import config
+import jinja2
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +88,7 @@ async def assetlist_get(scope, recieve, send):
             await send(rbody(json.dumps(recordset, default=str).encode("utf_8")))
 
 @App.route(
-        r"^/assets/([^\.]+)*(\..+)*$",
+        r"^/assets/([^\.]+)(\..+)$",
         scope_params={"method": "GET"}
         )
 async def asset_get(scope, recieve, send):
@@ -101,6 +112,44 @@ async def asset_get(scope, recieve, send):
             case ".md":
                 await send(rstart200_text)
         await send(rbody(file_bytes))
+
+@App.route(
+        r"^/assets/view/([^\.]+)(\..+)$",
+        scope_params={"method": "GET"}
+        )
+async def asset_viewer(scope, recieve, send):
+    # for detecting file extension for correct mime type
+    filename = scope["group"][0]
+    extension = scope["group"][1]
+    template_env = scope["state"]["template_env"]
+    
+    if not (filename and extension):
+        raise ValueError("Bad filename")
+
+    with open(config.assetsdir / (filename + extension), "rb") as f:
+        file_bytes = f.read()
+        match extension:
+            case ".jpg":
+                await send(rstart400_html)
+                # prevent html_str possibly unbound error
+                return
+            case ".pdf":
+                template = template_env.get_template("pdfviewer.html")
+                html_str = await template.render_async(
+                        title="",
+                        assetlink=f"{config.endpoint}/assets/{filename}{extension}"
+                    )
+                await send(rstart200_html)
+            case ".md":
+                template = template_env.get_template("mdviewer.html")
+                html_str = await template.render_async(
+                        title="",
+                        assetlink=f"{config.endpoint}/assets/{filename}{extension}"
+                    )
+                await send(rstart200_html)
+            case _:
+                html_str = "test"
+        await send(rbody(html_str.encode()))
 
 @App.route(
         r"^.*$",

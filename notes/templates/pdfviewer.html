@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+  <title>{{title}}</title>
+  <script>
+    pdfcontainer = document.getElementById("pdfcontainer");
+    window.addEventListener("resize", () => {
+      pdfcontainer.style.width = document.body.clientWidth;
+      pdfcontainer.style.height = document.body.clientHeight;
+    });
+  </script>
+  <body>
+	  <object id="pdfcontainer" type="application/pdf" data="{{assetlink}}"></object>
+  </body>
+</html>

@@ -17,19 +17,6 @@ const r = createBrowserRouter([
       path: '/',
       element: <AssetList></AssetList>,
 	},
-   {
-		path: '/notes/view/:assetname',
-		element: <PdfViewer></PdfViewer>,
-		loader: async ({params}) => params,
-	},
-	{
-		path: '/archive',
-		element: <></>
-	},
-	{
-		path: '/archive/:articlename',
-		element: <></>
-	}
 ]);
 
 const domRoot = document.getElementById('root');

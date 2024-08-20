@@ -12,6 +12,7 @@ streaming-form-data = "*"
 black = "*"
 pdf2image = "*"
 pillow = "*"
+jinja2 = "*"
 
 [dev-packages]
 

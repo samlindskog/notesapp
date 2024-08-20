@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useContext} from 'react';
-import { useNavigate, useLoaderData} from 'react-router-dom';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useNavigate, useLoaderData } from 'react-router-dom';
 import Moment from 'moment';
 import Container from '@mui/material/Container';
 import { Grid, Typography } from '@mui/material';
@@ -44,11 +44,24 @@ function Thumbnails({ children }) {
 
    const images = assets.map((asset) => {
       readable_time = Moment.parseZone(asset.dt).format('MMM D, YYYY h:mma');
+      switch (asset.typ) {
+         case 0:
+            extension = '.pdf';
+         case 1:
+            extension = '.md';
+         default:
+            extension = '';
+      }
       return (
          <Grid item xs={3} key={asset.id}>
             <CardActionArea
                disableRipple={true}
-               onClick={() => navigate(`/notes/view/${asset.id}.pdf`)}
+               onClick={() =>
+                  window.open(
+                     `${config.endpoint}/assets/view/${asset.id}${extension}`,
+                     '_blank'
+                  )
+               }
             >
                <Card>
                   <CardHeader
@@ -74,26 +87,26 @@ export function PdfViewer() {
       width: document.body.clientWidth,
       height: document.body.clientHeight,
    });
-	const windowRef = useRef(window)
+   const windowRef = useRef(window);
    const params = useLoaderData();
 
    useEffect(() => {
-		// dynamic sizing for object element
-		document.body.style.height='100vh'
-		document.body.style.width='100vw'
-		document.documentElement.style.overflow = 'hidden'
-		// hacky initial run to update clientHeight
-		setDimensions({
-			width: document.body.clientWidth,
-			height: document.body.clientHeight,
-		});
+      // dynamic sizing for object element
+      document.body.style.height = '100vh';
+      document.body.style.width = '100vw';
+      document.documentElement.style.overflow = 'hidden';
+      // hacky initial run to update clientHeight
+      setDimensions({
+         width: document.body.clientWidth,
+         height: document.body.clientHeight,
+      });
       windowRef.current.addEventListener('resize', () => {
          setDimensions({
             width: document.body.clientWidth,
             height: document.body.clientHeight,
          });
-			console.log("ran")
-			console.log(getWidth())
+         console.log('ran');
+         console.log(getWidth());
       });
 
       fetch(`${config.endpoint}/assets/${params.assetname}`, {
