@@ -45,7 +45,7 @@ rstart200_html = {
     "type": "http.response.start",
     "status": 200,
     "headers": [
-        [b"content-type", b"text/plain; charset=utf-8"],
+        [b"content-type", b"text/html; charset=utf-8"],
     ],
 }
 

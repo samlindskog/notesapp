@@ -1,6 +1,6 @@
 from pathlib import PosixPath
 import uvicorn
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 from psycopg.rows import dict_row
 
 from psycopg_pool import AsyncConnectionPool
@@ -44,7 +44,11 @@ class Resources:
 
     @property
     def template_env(self):
-        return Environment(loader=PackageLoader("main.py"), autoescape=False)
+        return Environment(
+                loader=FileSystemLoader(str(maindir / "templates")),
+                autoescape=False,
+                enable_async=True,
+                )
 
     @property
     def current_pool(self):

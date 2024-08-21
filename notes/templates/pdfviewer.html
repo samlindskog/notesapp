@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-  <title>{{title}}</title>
-  <script>
-    pdfcontainer = document.getElementById("pdfcontainer");
-    window.addEventListener("resize", () => {
-      pdfcontainer.style.width = document.body.clientWidth;
-      pdfcontainer.style.height = document.body.clientHeight;
-    });
-  </script>
-  <body>
-	  <object id="pdfcontainer" type="application/pdf" data="{{assetlink}}"></object>
-  </body>
+   <title>{{title}}</title>
+   <script>
+      window.onload = init;
+      function init() {
+         pdfcontainer = document.createElement("object");
+         pdfcontainer.setAttribute("style", "width:100vw;height:100vh");
+         pdfcontainer.setAttribute("type", "application/pdf");
+         pdfcontainer.setAttribute("data", "{{assetlink}}");
+         document.body.setAttribute("style", "margin:0px");
+         document.documentElement.setAttribute("style", "overflow:hidden");
+         document.body.append(pdfcontainer);
+      }
+   </script>
+   <body></body>
 </html>
