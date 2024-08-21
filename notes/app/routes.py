@@ -62,9 +62,10 @@ async def asset_viewer(scope, recieve, send):
             await send(rstart200_html)
         case ".md":
             template = template_env.get_template("mdviewer.html")
+            md = (config.assetsdir / (filename + extension)).read_text()
             html_str = await template.render_async(
                     title=title,
-                    assetlink=f"//{config.endpoint}/assets/{filename}{extension}"
+                    md=md
                 )
             await send(rstart200_html)
         case _:

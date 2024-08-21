@@ -69,6 +69,7 @@ def ingest_file(path, uuid):
             case "md":
                 with open(config.assetsdir / (uuid + ".md"), 'wb') as new_file:
                     new_file.write(file_bytes)
+                # add new thumbnail
 
 def delete_asset(uuid):
     match extension:
@@ -79,7 +80,7 @@ def delete_asset(uuid):
             pl.Path.unlink(config.assetsdir / (uuid + ".md"))
 
 # psycopg will abort transaction if exception is raised in cursor context
-with psycopg.connect(conninfo=config._conninfo, row_factory=dict_row) as conn:
+with psycopg.connect(conninfo=config._conninfo, row_factory=dict_row) as conn: # type: ignore
     with conn.cursor() as cur:
         if args.delete:
             cur.execute("SELECT * FROM notes.assets WHERE id=%s", [args.uuid])

@@ -1,27 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <title>{{title}}</title>
-  <script>
-    window.texme = { style: "plain" };
-    data = fetch("{{assetlink}}", {
-      method: "GET",
-      headers: { "Content-Type": "text/plain" },
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        return data;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    frag = document.createDocumentFragment();
-    textarea = document.createElement("textarea");
-    md = document.createTextNode(data);
-    frag.append(textarea);
-    frag.firstElementChild.append(md);
-    document.append(frag);
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/texme@1.2.2"></script>
+   <title>{{title}}</title>
+	<script>window.texme = { style: 'plain' }</script>
+	<script src="https://cdn.jsdelivr.net/npm/texme@1.2.2"></script>
+	<textarea>{{md}}</textarea>
 </html>

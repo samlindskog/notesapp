@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 uvicorn = {extras = ["standard"], version = "0.30.6"}
-psycopg = {extras = ["pool"], version = "*"}
+psycopg = {extras = ["pool"], version = "3.2.1"}
 oauthlib = {extras = ["signedtoken"], version = "*"}
 pyjwt = "*"
 streaming-form-data = "*"
