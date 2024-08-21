@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { AssetList, PdfViewer } from './app.jsx';
+import { AssetList } from './app.jsx';
 import CssBaseline from '@mui/material/CssBaseline';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -16,7 +16,7 @@ const r = createBrowserRouter([
    {
       path: '/',
       element: <AssetList></AssetList>,
-	},
+   },
 ]);
 
 const domRoot = document.getElementById('root');

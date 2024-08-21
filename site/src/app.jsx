@@ -47,8 +47,10 @@ function Thumbnails({ children }) {
       switch (asset.typ) {
          case 0:
             extension = '.pdf';
+            break;
          case 1:
             extension = '.md';
+            break;
          default:
             extension = '';
       }
@@ -79,53 +81,4 @@ function Thumbnails({ children }) {
    });
 
    return images;
-}
-
-export function PdfViewer() {
-   const [dataUri, setDataUri] = useState();
-   const [dimensions, setDimensions] = useState({
-      width: document.body.clientWidth,
-      height: document.body.clientHeight,
-   });
-   const windowRef = useRef(window);
-   const params = useLoaderData();
-
-   useEffect(() => {
-      // dynamic sizing for object element
-      document.body.style.height = '100vh';
-      document.body.style.width = '100vw';
-      document.documentElement.style.overflow = 'hidden';
-      // hacky initial run to update clientHeight
-      setDimensions({
-         width: document.body.clientWidth,
-         height: document.body.clientHeight,
-      });
-      windowRef.current.addEventListener('resize', () => {
-         setDimensions({
-            width: document.body.clientWidth,
-            height: document.body.clientHeight,
-         });
-         console.log('ran');
-         console.log(getWidth());
-      });
-
-      fetch(`${config.endpoint}/assets/${params.assetname}`, {
-         method: 'GET',
-         headers: { 'Content-Type': 'application/json' },
-      })
-         .then((response) => response.arrayBuffer())
-         .then((pdfBytes) => {
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            setDataUri(URL.createObjectURL(blob));
-         });
-   }, []);
-
-   return (
-      <object
-         id={params.assetname}
-         data={dataUri}
-         width={dimensions.width}
-         height={dimensions.height}
-      ></object>
-   );
 }
