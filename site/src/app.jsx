@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Moment from 'moment';
 import Container from '@mui/material/Container';
 import { Grid, Typography } from '@mui/material';
@@ -24,7 +23,6 @@ export function AssetList() {
 
 function Thumbnails({ children }) {
    const [assets, setAssets] = useState([]);
-   const navigate = useNavigate();
 
    useEffect(() => {
       fetch(`${config.endpoint}/assets/list`, {
@@ -42,17 +40,31 @@ function Thumbnails({ children }) {
          });
    }, []);
 
+	function Image({uuid, typ}) {
+		switch (typ) {
+			case 0:
+				return (
+					<CardMedia
+						component="img"
+						image={`${config.endpoint}/assets/${uuid}.jpg`}
+					></CardMedia>
+				);
+			case 1:
+				return null;
+		}
+	}
+
    const images = assets.map((asset) => {
       readable_time = Moment.parseZone(asset.dt).format('MMM D, YYYY h:mma');
       switch (asset.typ) {
          case 0:
-            extension = '.pdf';
+            asset.ext = '.pdf';
             break;
          case 1:
-            extension = '.md';
+            asset.ext = '.md';
             break;
          default:
-            extension = '';
+            asset.ext = '';
       }
       return (
          <Grid item xs={3} key={asset.id}>
@@ -60,7 +72,7 @@ function Thumbnails({ children }) {
                disableRipple={true}
                onClick={() =>
                   window.open(
-                     `${config.endpoint}/assets/view/${asset.id}${extension}`,
+                     `${config.endpoint}/assets/view/${asset.id}${asset.ext}`,
                      '_blank'
                   )
                }
@@ -70,10 +82,7 @@ function Thumbnails({ children }) {
                      title={asset.title}
                      subheader={`Edited: ${readable_time}`}
                   ></CardHeader>
-                  <CardMedia
-                     component="img"
-                     image={`${config.endpoint}/assets/${asset.id}.jpg`}
-                  ></CardMedia>
+                  <Image typ={asset.typ} uuid={asset.id}></Image>
                </Card>
             </CardActionArea>
          </Grid>
