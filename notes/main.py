@@ -48,6 +48,6 @@ async def app(scope, receive, send):
 
 
 if __name__ == "__main__":
-    config = config_factory("development")
+    config = config_factory("dev")
     server = uvicorn.Server(config)
     server.run()

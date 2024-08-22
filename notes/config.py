@@ -7,17 +7,20 @@ from psycopg_pool import AsyncConnectionPool
 from app.objects import Repository
 from app.app import App
 
+#global config
 maindir = PosixPath(__file__).parent
 assetsdir = maindir / "assets"
 endpoint = "72.14.178.40"
 
 def config_factory(config):
     match config:
-        case "development":
+        case "dev":
             return uvicorn.Config(
                 app="main:app",
                 reload=True,
             )
+        case "prod":
+            pass
     return uvicorn.Config(
         app="main:app",
     )

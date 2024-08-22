@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { AssetList } from './app.jsx';
+import { Home } from './app.jsx';
 import CssBaseline from '@mui/material/CssBaseline';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -15,7 +15,7 @@ export const config = {
 const r = createBrowserRouter([
    {
       path: '/',
-      element: <AssetList></AssetList>,
+      element: <Home></Home>
    },
 ]);
 

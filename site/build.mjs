@@ -25,7 +25,6 @@ async function dev() {
       outdir: 'srv',
       bundle: true,
       logLevel: 'info',
-      plugins: [sassPlugin()],
    });
 
    await ctx.watch();
@@ -46,6 +45,12 @@ async function dev() {
 async function prod() {
    let build = await esbuild.build({
       entryPoints: ['./src/main.jsx'],
+      loader: {
+         '.html': 'text',
+         '.woff': 'text',
+         '.woff2': 'text',
+      },
+		/*
       target: [
          'es6',
          'chrome',
@@ -56,8 +61,9 @@ async function prod() {
          'opera',
          'safari',
       ],
+		*/
       drop: ['console', 'debugger'],
-      dropLabes: ['TEST'],
+      dropLabels: ['TEST'],
       minify: true,
       treeShaking: true,
       bundle: true,

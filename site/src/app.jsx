@@ -7,13 +7,29 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import CardHeader from '@mui/material/CardHeader';
 import CardActionArea from '@mui/material/CardActionArea';
+import Divider from '@mui/material/Divider';
 import { useTheme, ThemeProvider, createTheme } from '@mui/material/styles';
 
 import { config } from './main';
 
+export function Home() {
+	return(
+		<>
+		<Typography variant="h3" sx={{padding: "1rem"}}>Sam's notes</Typography>
+		<Divider></Divider>
+		<AssetList></AssetList>
+		</>
+	)
+}
+
 export function AssetList() {
    return (
-      <Container>
+      <Container
+         sx={{
+            paddingTop: '2rem',
+            paddingBottom: '2rem',
+         }}
+      >
          <Grid container spacing={4}>
             <Thumbnails />
          </Grid>
@@ -40,19 +56,19 @@ function Thumbnails({ children }) {
          });
    }, []);
 
-	function Image({uuid, typ}) {
-		switch (typ) {
-			case 0:
-				return (
-					<CardMedia
-						component="img"
-						image={`${config.endpoint}/assets/${uuid}.jpg`}
-					></CardMedia>
-				);
-			case 1:
-				return null;
-		}
-	}
+   function Image({ uuid, typ }) {
+      switch (typ) {
+         case 0:
+            return (
+               <CardMedia
+                  component="img"
+                  image={`${config.endpoint}/assets/${uuid}.jpg`}
+               ></CardMedia>
+            );
+         case 1:
+            return null;
+      }
+   }
 
    const images = assets.map((asset) => {
       readable_time = Moment.parseZone(asset.dt).format('MMM D, YYYY h:mma');
