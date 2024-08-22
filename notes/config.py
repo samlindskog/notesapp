@@ -10,6 +10,7 @@ from app.app import App
 #global config
 maindir = PosixPath(__file__).parent
 assetsdir = maindir / "assets"
+sitedir = maindir.parent / "site"
 endpoint = "72.14.178.40"
 
 def config_factory(config):

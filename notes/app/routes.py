@@ -17,6 +17,27 @@ from app.responses import (
 logger = logging.getLogger(__name__)
 
 @App.route(
+        r"^/?$",
+        scope_params={"method": "GET"}
+        )
+async def home(scope, recieve, send):
+    with open(config.sitedir / "build/index.html", "rb") as f:
+        file_bytes = f.read()
+        await send(rstart200_html)
+        await send(rbody(file_bytes))
+
+@App.route(
+        r"^/(.+)$",
+        scope_params={"method": "GET"}
+        )
+async def home_assets(scope, recieve, send):
+    filename = scope["group"][0]
+    with open(config.sitedir / "build" / filename, "rb") as f:
+        file_bytes = f.read()
+        await send(rstart200_html)
+        await send(rbody(file_bytes))
+
+@App.route(
         r"^/assets/list$",
         scope_params={"method": "GET"}
         )
