@@ -21,6 +21,11 @@ def config_factory(config):
                 reload=True,
             )
         case "prod":
+            return uvicorn.Config(
+                app="main:app",
+                loop="uvloop",
+                http="httptools"
+            )
             pass
     return uvicorn.Config(
         app="main:app",

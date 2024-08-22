@@ -1,3 +1,4 @@
+import os
 import logging
 import uvicorn
 from config import config_factory, Resources
@@ -23,6 +24,7 @@ async def lifespan(scope, receive, send):
             await send({"type": "lifespan.startup.failed", "message": str(e)})
         else:
             await send({"type": "lifespan.startup.complete"})
+            logging.debug("PROD=" + os.environ["PROD"])
 
     elif message["type"] == "lifespan.shutdown":
         try:
@@ -46,8 +48,11 @@ async def app(scope, receive, send):
         case "lifespan":
             await lifespan(scope, receive, send)
 
-
 if __name__ == "__main__":
-    config = config_factory("dev")
+    prod = os.environ.get("PROD")
+    if prod == "true":
+        config = config_factory("prod")
+    else:
+        config = config_factory("dev")
     server = uvicorn.Server(config)
     server.run()
