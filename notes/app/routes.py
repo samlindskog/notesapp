@@ -27,11 +27,11 @@ async def home(scope, recieve, send):
         await send(rbody(file_bytes))
 
 @App.route(
-        r"^/(.+)$",
+        r"^/(main\.css)?(main\.js)?$",
         scope_params={"method": "GET"}
         )
 async def home_assets(scope, recieve, send):
-    filename = scope["group"][0]
+    filename = "main.css" if scope["group"][0] else "main.js"
     with open(config.sitedir / "build" / filename, "rb") as f:
         file_bytes = f.read()
         await send(rstart200_html)

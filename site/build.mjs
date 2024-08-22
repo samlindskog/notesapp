@@ -1,5 +1,4 @@
 import { argv } from 'node:process';
-import { sassPlugin } from 'esbuild-sass-plugin';
 import * as esbuild from 'esbuild';
 import { SourceMap } from 'node:module';
 
