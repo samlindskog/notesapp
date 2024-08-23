@@ -51,7 +51,7 @@ async def assetlist_get(scope, recieve, send):
             await send(rbody(json.dumps(recordset, default=str).encode("utf_8")))
 
 @App.route(
-        r"^/assets/view/([^\.]+)(\..+)$",
+        r"^/assets/view/([\-a-z0-9]+)(\.[a-z]+)$",
         scope_params={"method": "GET"}
         )
 async def asset_viewer(scope, recieve, send):
@@ -71,9 +71,6 @@ async def asset_viewer(scope, recieve, send):
             title = recordset[0]["title"]
 
     match extension:
-        case ".jpg":
-            await send(rstart400_html)
-            return
         case ".pdf":
             template = template_env.get_template("pdfviewer.html")
             html_str = await template.render_async(
@@ -90,11 +87,12 @@ async def asset_viewer(scope, recieve, send):
                 )
             await send(rstart200_html)
         case _:
+            await send(rstart400_html)
             return
     await send(rbody(html_str.encode()))
 
 @App.route(
-        r"^/assets/([^\.]+)(\..+)$",
+        r"^/assets/([\-a-z0-9]+)(\.[a-z]+)$",
         scope_params={"method": "GET"}
         )
 async def asset_get(scope, recieve, send):
