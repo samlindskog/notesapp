@@ -106,5 +106,8 @@ with psycopg.connect(conninfo=config._conninfo, row_factory=dict_row) as conn: #
             # add asset to assetsdir
             cur.execute("SELECT * FROM notes.assets WHERE title=%s", [args.title])
             recordset = cur.fetchall()
-            uuid = str(recordset[0]["id"])
+            if not args.uuid:
+                uuid = str(recordset[0]["id"]) # type: ignore
+            else:
+                uuid = args.uuid
             ingest_file(args.file_path, uuid)

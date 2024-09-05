@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Moment from 'moment';
+import moment from 'moment';
 import Container from '@mui/material/Container';
 import { Grid, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
@@ -71,7 +71,7 @@ function Thumbnails({ children }) {
    }
 
    const images = assets.map((asset) => {
-      readable_time = Moment.parseZone(asset.dt).format('MMM D, YYYY h:mma');
+      readable_time = moment(asset.dt).format('MMM D, YYYY h:mma');
       switch (asset.typ) {
          case 0:
             asset.ext = '.pdf';
